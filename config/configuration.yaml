@@ -1,0 +1,9 @@
+# Minimal Home Assistant configuration for developing the SMA Modbus custom integration.
+# The integration is installed by HACS (or symlinked) into custom_components/.
+default_config:
+
+logger:
+  default: info
+  logs:
+    custom_components.sma_modbus: debug
+    modbus_connection: debug

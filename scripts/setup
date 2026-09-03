@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -e
+
+# Install the development, lint and test requirements.
+pip install -r requirements_dev.txt

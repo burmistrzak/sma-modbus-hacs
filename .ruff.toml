@@ -1,0 +1,19 @@
+line-length = 88
+
+[lint]
+select = [
+  "A",
+  "ASYNC",
+  "B",
+  "D",
+  "E",
+  "F",
+  "I",
+  "RUF",
+  "SIM",
+  "UP",
+]
+ignore = ["D203", "D213"]
+
+[lint.per-file-ignores]
+"tests/*" = ["D"]

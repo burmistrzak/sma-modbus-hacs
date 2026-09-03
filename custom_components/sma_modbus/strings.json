@@ -1,0 +1,94 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
+    },
+    "error": {
+      "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
+      "unknown": "[%key:common::config_flow::error::unknown%]"
+    },
+    "step": {
+      "user": {
+        "data": {
+          "device_type": "Device type",
+          "host": "[%key:common::config_flow::data::host%]",
+          "port": "Modbus port",
+          "unit_id": "Modbus unit ID"
+        },
+        "data_description": {
+          "host": "The IP address or hostname of your SMA device.",
+          "port": "Port of the device's Modbus TCP interface. Only used when Modbus is enabled on the device.",
+          "unit_id": "The Modbus slave address of the device (Sunny Home Manager: 2, inverters: 3)."
+        },
+        "description": "Configure your SMA Modbus TCP device."
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "battery_charge_energy": {
+        "name": "Battery charge energy"
+      },
+      "battery_charge_power": {
+        "name": "Battery charge power"
+      },
+      "battery_discharge_energy": {
+        "name": "Battery discharge energy"
+      },
+      "battery_discharge_power": {
+        "name": "Battery discharge power"
+      },
+      "battery_nominal_capacity": {
+        "name": "Battery nominal capacity"
+      },
+      "battery_state_of_charge": {
+        "name": "Battery state of charge"
+      },
+      "dc_energy_total_1": {
+        "name": "DC energy total string 1"
+      },
+      "dc_energy_total_2": {
+        "name": "DC energy total string 2"
+      },
+      "dc_energy_total_3": {
+        "name": "DC energy total string 3"
+      },
+      "dc_power_1": {
+        "name": "DC power string 1"
+      },
+      "dc_power_2": {
+        "name": "DC power string 2"
+      },
+      "dc_power_3": {
+        "name": "DC power string 3"
+      },
+      "dc_voltage_1": {
+        "name": "DC voltage string 1"
+      },
+      "dc_voltage_2": {
+        "name": "DC voltage string 2"
+      },
+      "dc_voltage_3": {
+        "name": "DC voltage string 3"
+      },
+      "grid_export_energy": {
+        "name": "Grid export energy"
+      },
+      "grid_export_power": {
+        "name": "Grid export power"
+      },
+      "grid_import_energy": {
+        "name": "Grid import energy"
+      },
+      "grid_import_power": {
+        "name": "Grid import power"
+      },
+      "pv_energy_total": {
+        "name": "PV energy total"
+      },
+      "pv_power": {
+        "name": "PV power"
+      }
+    }
+  }
+}

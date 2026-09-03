@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -e
+
+# Run Home Assistant with the development configuration in config/, with the
+# custom component available on the path. Requires Home Assistant installed
+# (`pip install homeassistant`), or run inside the devcontainer.
+container check >/dev/null 2>&1 && DOCKER_RUNNING=1 || DOCKER_RUNNING=0
+
+if [ "$DOCKER_RUNNING" -eq 1 ]; then
+  docker run --rm \
+    -v "$(pwd)":/workspaces/integration \
+    -v "$(pwd)/config":/config \
+    -p 8123:8123 \
+    ghcr.io/home-assistant/home-assistant:stable
+else
+  exec hass --config config
+fi

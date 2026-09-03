@@ -7,11 +7,11 @@ The device-specific communication lives in the `sma_modbus` library, which is
 is self-contained and installable through [HACS](https://hacs.xyz).
 
 > [!WARNING]
-> This is an experimental, agentic port of the core [Fonius](https://github.com/home-assistant/core/tree/dev/homeassistant/components/fronius) component.
+> This is an experimental, agentic port of the core [Fronius](https://github.com/home-assistant/core/tree/dev/homeassistant/components/fronius) component.
 > 
-> Do not use it for anything else than testing.
+> Do not use it for anything else than testing and reporting bugs.
 >
-> You have been warned.
+> **You have been warned.**
 
 
 ## What you get

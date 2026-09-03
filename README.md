@@ -1,18 +1,24 @@
 # SMA Modbus
 
-Custom Home Assistant integration for **SMA Modbus** — SMA solar devices over Modbus TCP:
-the Sunny Home Manager grid meter, the Sunny Boy Smart Energy hybrid inverter
-and the Sunny Boy PV inverter.
+Custom Home Assistant integration for **SMA** devices, utilizing the modernized Modbus stack.
 
 The device-specific communication lives in the `sma_modbus` library, which is
 **vendorized** under `custom_components/sma_modbus/sma_modbus/`, so this integration
 is self-contained and installable through [HACS](https://hacs.xyz).
 
+> [!WARNING]
+> This is an experimental, agentic port of the core [Fonius](https://github.com/home-assistant/core/tree/dev/homeassistant/components/fronius) component.
+> 
+> Do not use it for anything else than testing.
+>
+> You have been warned.
+
+
 ## What you get
 
 One sensor per measurement, polled over Modbus:
 
-- **Sunny Home Manager** — grid import/export energy and power.
+- **Sunny Home Manager 2.0** — grid import/export energy and power.
 - **Sunny Boy Smart Energy** — PV energy and power, battery charge/discharge
   energy and power, battery state of charge, and per-string DC power, voltage
   and lifetime energy.

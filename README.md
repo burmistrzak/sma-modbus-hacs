@@ -7,25 +7,22 @@ The device-specific communication lives in the `sma_modbus` library, which is
 is self-contained and installable through [HACS](https://hacs.xyz).
 
 > [!WARNING]
-> This is an experimental, agentic port of the core [Fronius](https://github.com/home-assistant/core/tree/dev/homeassistant/components/fronius) component.
+> This is an experimental, partial agentic port of the core [Fronius](https://github.com/home-assistant/core/tree/dev/homeassistant/components/fronius) component.
 > 
-> Do not use it for anything else than testing and reporting bugs.
+> While the integration _does work_, do not use it for anything else than testing
+> and reporting bugs.
 >
 > **You have been warned.**
 
 
-## What you get
+## Supported Devices
 
-One sensor per measurement, polled over Modbus:
+- **Sunny Home Manager 2.0**
+- **Sunny Boy Smart Energy 3.6-6.0**
+- **Sunny Boy 3.6-6.0**
 
-- **Sunny Home Manager 2.0** — grid import/export energy and power.
-- **Sunny Boy Smart Energy** — PV energy and power, battery charge/discharge
-  energy and power, battery state of charge, and per-string DC power, voltage
-  and lifetime energy.
-- **Sunny Boy** — PV energy and power, per-string DC power and voltage.
+Only essential parameters are supported _at this point_. Support for many more Modbus parameter is planned, but most of them will be disabled by default to keep the inverter's system-load under control.
 
-A measurement reads as `unavailable` when the device reports its not-a-value
-sentinel, so a powered-down or unsupported value is distinct from a real zero.
 
 ## Installation (HACS)
 
@@ -36,8 +33,7 @@ sentinel, so a powered-down or unsupported value is distinct from a real zero.
 4. Pick your device type, enter the IP/hostname, Modbus port (default 502) and
    unit ID (Home Manager: 2, inverters: 3).
 
-> Modbus must be enabled on the device (SMA inverters: *Device configuration →
-> Modbus → Enable Modbus TCP*).
+> Modbus must be enabled on the device.
 
 ## Requirements
 
@@ -45,17 +41,6 @@ sentinel, so a powered-down or unsupported value is distinct from a real zero.
 - `modbus-connection[tmodbus]` is installed automatically from `manifest.json`
   `requirements`.
 
-## About this custom build
-
-This custom integration **opens its own Modbus TCP connection**, which is the
-practical way to make it testable through HACS *before* the shared-connection
-Modbus integration is released in Home Assistant core.
-
-A matching **core integration** (`sma_modbus`) exists that, once the new Modbus
-integration is in core, asks the Modbus integration for a shared unit instead
-(`async_get_unit`) and consumes the standalone `sma-modbus` library from PyPI.
-When that core integration ships, this custom component is superseded by it
-and can be removed.
 
 ## Development
 
@@ -65,3 +50,7 @@ ruff check . && ruff format --check .
 pytest
 scripts/develop   # start Home Assistant with config/
 ```
+
+## Disclaimer
+
+This is an unofficial integration and in no way affiliated with SMA Solar Technology AG.

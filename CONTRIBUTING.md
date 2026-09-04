@@ -1,6 +1,10 @@
 # Contributing
 
-This is a custom Home Assistant integration. Contributions are welcome.
+Contributions are always welcome, especially additional SMA inverter types.
+
+> [!NOTE]
+> Do not request support for a specifc device when you are unable to test
+> the integration with real hardware.
 
 ## Development setup
 

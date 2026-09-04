@@ -19,6 +19,7 @@ from homeassistant.const import (
     UnitOfEnergy,
     UnitOfFrequency,
     UnitOfPower,
+    UnitOfReactivePower,
     UnitOfTemperature,
 )
 from homeassistant.core import HomeAssistant, callback
@@ -123,7 +124,7 @@ def _apparent_power(key: str) -> SmaSensorEntityDescription:
 def _reactive_power(key: str) -> SmaSensorEntityDescription:
     return SmaSensorEntityDescription(
         key=key,
-        native_unit_of_measurement=UnitOfApparentPower.VOLT_AMPERE_REACTIVE,
+        native_unit_of_measurement=UnitOfReactivePower.VOLT_AMPERE_REACTIVE,
         device_class=SensorDeviceClass.REACTIVE_POWER,
         state_class=SensorStateClass.MEASUREMENT,
     )

@@ -16,6 +16,7 @@ from homeassistant.const import (
     UnitOfApparentPower,
     UnitOfElectricCurrent,
     UnitOfElectricPotential,
+    UnitOfElectricResistance,
     UnitOfEnergy,
     UnitOfFrequency,
     UnitOfPower,
@@ -45,12 +46,16 @@ class SmaSensorEntityDescription(SensorEntityDescription):
     """
 
 
-def _energy(key: str) -> SmaSensorEntityDescription:
+def _energy(
+    key: str,
+    suggested_unit: str = UnitOfEnergy.KILO_WATT_HOUR,
+) -> SmaSensorEntityDescription:
     return SmaSensorEntityDescription(
         key=key,
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         device_class=SensorDeviceClass.ENERGY,
         state_class=SensorStateClass.TOTAL_INCREASING,
+        suggested_unit_of_measurement=suggested_unit,
     )
 
 
@@ -154,11 +159,17 @@ def _enum(key: str, enum_type: type[IntEnum]) -> SmaSensorEntityDescription:
     )
 
 
-def _diagnostic(key: str) -> SmaSensorEntityDescription:
+def _diagnostic(
+    key: str,
+    unit: str | None = None,
+    device_class: SensorDeviceClass | None = None,
+) -> SmaSensorEntityDescription:
     return SmaSensorEntityDescription(
         key=key,
         entity_category=EntityCategory.DIAGNOSTIC,
         state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=unit,
+        device_class=device_class,
     )
 
 
@@ -210,7 +221,7 @@ SENSOR_DESCRIPTIONS: Final[dict[DeviceType, list[SmaSensorEntityDescription]]] =
         _current("battery_current"),
         _battery("battery_state_of_charge"),
         _battery("battery_nominal_capacity"),
-        _temperature("battery_temperature"),
+        _diagnostic("battery_temperature", UnitOfTemperature.CELSIUS, SensorDeviceClass.TEMPERATURE),
         _voltage("battery_voltage"),
         _power("battery_charge_power"),
         _power("battery_discharge_power"),
@@ -218,8 +229,8 @@ SENSOR_DESCRIPTIONS: Final[dict[DeviceType, list[SmaSensorEntityDescription]]] =
         _energy("battery_discharge_energy"),
         _enum("battery_health", BatteryHealth),
         _voltage("battery_max_voltage"),
-        _temperature("battery_temperature_max"),
-        _temperature("battery_temperature_min"),
+        _diagnostic("battery_temperature_max", UnitOfTemperature.CELSIUS, SensorDeviceClass.TEMPERATURE),
+        _diagnostic("battery_temperature_min", UnitOfTemperature.CELSIUS, SensorDeviceClass.TEMPERATURE),
         _voltage("battery_end_of_charge_voltage"),
         _voltage("battery_end_of_discharge_voltage"),
         _current("battery_max_charge_current"),
@@ -234,9 +245,9 @@ SENSOR_DESCRIPTIONS: Final[dict[DeviceType, list[SmaSensorEntityDescription]]] =
         _power("dc_power_0"),
         _power("dc_power_1"),
         _power("dc_power_2"),
-        _energy("dc_energy_total_0"),
-        _energy("dc_energy_total_1"),
-        _energy("dc_energy_total_2"),
+        _energy("dc_energy_total_0", UnitOfEnergy.WATT_HOUR),
+        _energy("dc_energy_total_1", UnitOfEnergy.WATT_HOUR),
+        _energy("dc_energy_total_2", UnitOfEnergy.WATT_HOUR),
         _voltage("dc_voltage_0"),
         _voltage("dc_voltage_1"),
         _voltage("dc_voltage_2"),
@@ -244,8 +255,8 @@ SENSOR_DESCRIPTIONS: Final[dict[DeviceType, list[SmaSensorEntityDescription]]] =
         _current("dc_current_1"),
         _current("dc_current_2"),
         # Insulation
-        _diagnostic("insulation_resistance"),
-        _current("insulation_residual_current"),
+        _diagnostic("insulation_resistance", UnitOfElectricResistance.OHM),
+        _diagnostic("insulation_residual_current", UnitOfElectricCurrent.AMPERE, SensorDeviceClass.CURRENT),
     ],
     DeviceType.SUNNY_BOY: [
         # PV
@@ -291,8 +302,8 @@ SENSOR_DESCRIPTIONS: Final[dict[DeviceType, list[SmaSensorEntityDescription]]] =
         _current("dc_current_0"),
         _current("dc_current_1"),
         # Insulation
-        _diagnostic("insulation_resistance"),
-        _current("insulation_residual_current"),
+        _diagnostic("insulation_resistance", UnitOfElectricResistance.OHM),
+        _diagnostic("insulation_residual_current", UnitOfElectricCurrent.AMPERE, SensorDeviceClass.CURRENT),
     ],
 }
 

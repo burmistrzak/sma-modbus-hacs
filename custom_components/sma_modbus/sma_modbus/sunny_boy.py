@@ -1,10 +1,6 @@
-"""SMA Sunny Boy PV inverter.
+"""SMA Sunny Boy 3.0-6.0.
 
-A plain PV inverter: PV yield and power plus per-string DC power and
-voltage. Register addresses per the SMA Modbus profile, read as input
-registers. The Sunny Boy 3-6 and similar single-MPPT / two-string models
-report the same registers as the Sunny Boy Smart Energy minus the battery
-block.
+A single-phase PV inverter with four DC string inputs acrosss two MPPT trackers.
 """
 
 from modbus_connection.model import int32, uint32, uint64

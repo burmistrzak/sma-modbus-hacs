@@ -88,6 +88,14 @@
       },
       "pv_power": {
         "name": "PV power"
+      },
+      "system_status": {
+        "name": "System status",
+        "state": {
+          "ok": "OK",
+          "warning": "Warning",
+          "error": "Error"
+        }
       }
     }
   }

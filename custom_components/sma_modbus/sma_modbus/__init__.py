@@ -1,4 +1,4 @@
-"""Library for SMA Modbus TCP interfaces.
+"""Library for SMA Modbus TCP interface.
 
 Consumes a ``modbus_connection.ModbusUnit`` - connection lifecycle stays with
 the caller. Each device is a single :class:`~modbus_connection.model.Component`

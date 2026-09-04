@@ -7,9 +7,6 @@ from contextlib import suppress
 from typing import Any
 
 import voluptuous as vol
-from modbus_connection import ModbusError, ModbusTcpParams
-from modbus_connection.tmodbus import ModbusConnection
-
 from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
 from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.core import HomeAssistant
@@ -24,12 +21,14 @@ from homeassistant.helpers.selector import (
     SelectSelectorMode,
     TextSelector,
 )
+from modbus_connection import ModbusError, ModbusTcpParams
+from modbus_connection.tmodbus import ModbusConnection
 
 from .const import (
     CONF_DEVICE_TYPE,
     CONF_UNIT_ID,
     DEFAULT_PORT,
-    DEFAULT_UNIT_ID,
+    DEFAULT_UNIT_IDS,
     DEVICE_NAMES,
     DOMAIN,
 )
@@ -52,7 +51,17 @@ def _device_options() -> list[SelectOptionDict]:
     ]
 
 
-def _schema() -> vol.Schema:
+def _schema(device_type: DeviceType | None = None) -> vol.Schema:
+    """Build the user form schema.
+
+    The unit ID default follows the selected device type: 2 for the Sunny
+    Home Manager, 3 for inverters.
+    """
+    default_unit = (
+        DEFAULT_UNIT_IDS[device_type]
+        if device_type
+        else next(iter(DEFAULT_UNIT_IDS.values()))
+    )
     return vol.Schema(
         {
             vol.Required(CONF_DEVICE_TYPE): SelectSelector(
@@ -63,7 +72,7 @@ def _schema() -> vol.Schema:
             ),
             vol.Required(CONF_HOST): TextSelector(),
             vol.Required(CONF_PORT, default=DEFAULT_PORT): _PORT,
-            vol.Required(CONF_UNIT_ID, default=DEFAULT_UNIT_ID): _UNIT,
+            vol.Required(CONF_UNIT_ID, default=default_unit): _UNIT,
         }
     )
 
@@ -110,7 +119,7 @@ class SmaConfigFlow(ConfigFlow, domain=DOMAIN):
                 device_type = await _async_validate(self.hass, data)
             except CannotConnect:
                 errors["base"] = "cannot_connect"
-            except Exception:  # noqa: BLE001
+            except Exception:
                 _LOGGER.exception("Unexpected exception")
                 errors["base"] = "unknown"
             else:
@@ -127,7 +136,11 @@ class SmaConfigFlow(ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="user",
-            data_schema=_schema(),
+            data_schema=_schema(
+                DeviceType(user_input[CONF_DEVICE_TYPE])
+                if user_input and CONF_DEVICE_TYPE in user_input
+                else None
+            ),
             errors=errors,
         )
 

@@ -4,14 +4,13 @@ from __future__ import annotations
 
 import logging
 
-from modbus_connection import ModbusError
-
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
     UpdateFailed,
 )
+from modbus_connection import ModbusError
 
 from .const import DOMAIN, SCAN_INTERVAL
 from .sma_modbus import DeviceType, SmaComponent

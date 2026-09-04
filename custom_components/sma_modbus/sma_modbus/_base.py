@@ -1,6 +1,6 @@
 """Common base for SMA Modbus components.
 
-SMA inverters and energy meters expose their measurements as Modbus *input
+SMA devices expose their measurements as Modbus *input
 registers* (function code 4). Every component in this library reads from that
 space, so the base class fixes ``register_space = "input"`` once here.
 """

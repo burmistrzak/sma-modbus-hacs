@@ -2,18 +2,19 @@
 
 from unittest.mock import patch
 
-from custom_components.sma_modbus.const import CONF_DEVICE_TYPE, CONF_UNIT_ID, DOMAIN
-from custom_components.sma_modbus.coordinator import SmaCoordinator
-from custom_components.sma_modbus.sensor import SENSOR_DESCRIPTIONS
-from custom_components.sma_modbus.sma_modbus import DeviceType, SunnyBoySmartEnergy
-from custom_components.sma_modbus.sma_modbus.testing import set_input_registers
-from modbus_connection.mock import MockModbusConnection, MockModbusUnit
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_registry import async_entries_for_config_entry
 from homeassistant.helpers.entity_registry import async_get as async_get_entity_registry
+from modbus_connection.mock import MockModbusConnection, MockModbusUnit
 from pytest_homeassistant_custom_component.common import MockConfigEntry
+
+from custom_components.sma_modbus.const import CONF_DEVICE_TYPE, CONF_UNIT_ID, DOMAIN
+from custom_components.sma_modbus.coordinator import SmaCoordinator
+from custom_components.sma_modbus.sensor import SENSOR_DESCRIPTIONS
+from custom_components.sma_modbus.sma_modbus import DeviceType, SunnyBoySmartEnergy
+from custom_components.sma_modbus.sma_modbus.testing import set_input_registers
 
 
 def _preloaded_unit() -> MockModbusUnit:

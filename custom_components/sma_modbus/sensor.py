@@ -1,6 +1,7 @@
 """Support for SMA sensors."""
 
 from dataclasses import dataclass
+from enum import IntEnum
 from typing import Final
 
 from homeassistant.components.sensor import (
@@ -24,6 +25,7 @@ from . import SmaConfigEntry
 from .coordinator import SmaCoordinator
 from .entity import SmaEntity
 from .sma_modbus import DeviceType
+from .sma_modbus.home_manager import SystemStatus
 
 PARALLEL_UPDATES = 0
 
@@ -74,8 +76,24 @@ def _voltage(key: str) -> SmaSensorEntityDescription:
     )
 
 
+def _enum(key: str, enum_type: type[IntEnum]) -> SmaSensorEntityDescription:
+    """Create an ENUM sensor description for a typed status field.
+
+    The library returns an ``IntEnum`` member (or ``None`` on the sentinel);
+    the entity converts it to the member's lowercase ``.name`` so Home
+    Assistant stores the state as a string from ``options``. Translation keys
+    must be ``[a-z0-9-_]+``.
+    """
+    return SmaSensorEntityDescription(
+        key=key,
+        device_class=SensorDeviceClass.ENUM,
+        options=[member.name.lower() for member in enum_type],
+    )
+
+
 SENSOR_DESCRIPTIONS: Final[dict[DeviceType, list[SmaSensorEntityDescription]]] = {
     DeviceType.SUNNY_HOME_MANAGER: [
+        _enum("system_status", SystemStatus),
         _energy("grid_import_energy"),
         _energy("grid_export_energy"),
         _power("grid_import_power"),
@@ -150,6 +168,8 @@ class SmaSensor(SmaEntity, SensorEntity):
     def _read_value(self) -> StateType:
         """Read the field value from the device component."""
         value = getattr(self.device, self.entity_description.key)
+        if isinstance(value, IntEnum):
+            return value.name.lower()
         if isinstance(value, float):
             return round(value, 4)
         return value

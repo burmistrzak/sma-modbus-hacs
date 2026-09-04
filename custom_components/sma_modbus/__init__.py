@@ -10,12 +10,11 @@ and shares the connection instead of opening its own.
 import logging
 from typing import Final
 
-from modbus_connection import ModbusTcpParams
-from modbus_connection.tmodbus import ModbusConnection
-
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, Platform
 from homeassistant.core import HomeAssistant
+from modbus_connection import ModbusTcpParams
+from modbus_connection.tmodbus import ModbusConnection
 
 from .const import CONF_DEVICE_TYPE, CONF_UNIT_ID, DEFAULT_PORT
 from .coordinator import SmaCoordinator

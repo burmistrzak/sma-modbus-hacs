@@ -1,9 +1,7 @@
-"""SMA Sunny Boy Smart Energy hybrid inverter.
+"""SMA Sunny Boy Smart Energy 3.6-6.0.
 
-A PV inverter with an integrated battery: PV yield, battery charge and
-discharge energy and power, battery state of charge, and per-string DC
-power, voltage and lifetime energy. Register addresses per the SMA Modbus
-profile, read as input registers.
+A single-phase hybrid PV inverter three MPPT trackers and DC string inputs.
+Battery storage is connected to a dedicated DC input.
 """
 
 from modbus_connection.model import int32, uint32, uint64

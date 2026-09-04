@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Sync the vendorized sma_modbus package from the sma-modbus repository.
+#
+# Usage:
+#   scripts/update_vendor [path/to/sma-modbus]
+#
+# Defaults to the sibling ../sma-modbus directory.
+set -euo pipefail
+
+REPO="${1:-$(dirname "$0")/../../sma-modbus}"
+SRC="$REPO/sma_modbus"
+DEST="$(dirname "$0")/../custom_components/sma_modbus/sma_modbus"
+
+if [ ! -d "$SRC" ]; then
+  echo "error: $SRC not found — pass the path to your sma-modbus repo" >&2
+  exit 1
+fi
+
+echo "Syncing $SRC -> $DEST"
+rm -rf "$DEST"
+cp -R "$SRC" "$DEST"
+find "$DEST" -name __pycache__ -type d -exec rm -rf {} + 2>/dev/null || true
+echo "Done. Files:"
+ls -1 "$DEST"

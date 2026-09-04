@@ -26,69 +26,91 @@
   },
   "entity": {
     "sensor": {
-      "battery_charge_energy": {
-        "name": "Battery charge energy"
+      "ac_apparent_power": { "name": "Apparent power" },
+      "ac_apparent_power_l1": { "name": "Apparent power L1" },
+      "ac_apparent_power_l2": { "name": "Apparent power L2" },
+      "ac_apparent_power_l3": { "name": "Apparent power L3" },
+      "ac_current": { "name": "AC current" },
+      "ac_current_l1": { "name": "AC current L1" },
+      "ac_current_l2": { "name": "AC current L2" },
+      "ac_current_l3": { "name": "AC current L3" },
+      "ac_power": { "name": "AC power" },
+      "ac_power_l1": { "name": "AC power L1" },
+      "ac_power_l2": { "name": "AC power L2" },
+      "ac_power_l3": { "name": "AC power L3" },
+      "ac_reactive_power": { "name": "Reactive power" },
+      "ac_reactive_power_l1": { "name": "Reactive power L1" },
+      "ac_reactive_power_l2": { "name": "Reactive power L2" },
+      "ac_reactive_power_l3": { "name": "Reactive power L3" },
+      "ac_voltage_l1": { "name": "AC voltage L1" },
+      "ac_voltage_l1_l2": { "name": "AC voltage L1-L2" },
+      "ac_voltage_l2": { "name": "AC voltage L2" },
+      "ac_voltage_l2_l3": { "name": "AC voltage L2-L3" },
+      "ac_voltage_l3": { "name": "AC voltage L3" },
+      "ac_voltage_l3_l1": { "name": "AC voltage L3-L1" },
+      "battery_cell_voltage_max": { "name": "Battery cell voltage max" },
+      "battery_cell_voltage_min": { "name": "Battery cell voltage min" },
+      "battery_cell_voltage_sum": { "name": "Battery cell voltage sum" },
+      "battery_charge_energy": { "name": "Battery charge energy" },
+      "battery_charge_power": { "name": "Battery charge power" },
+      "battery_current": { "name": "Battery current" },
+      "battery_current_charge_energy": { "name": "Battery current charge energy" },
+      "battery_current_discharge_energy": { "name": "Battery current discharge energy" },
+      "battery_discharge_energy": { "name": "Battery discharge energy" },
+      "battery_discharge_power": { "name": "Battery discharge power" },
+      "battery_end_of_charge_voltage": { "name": "Battery end-of-charge voltage" },
+      "battery_end_of_discharge_voltage": { "name": "Battery end-of-discharge voltage" },
+      "battery_health": {
+        "name": "Battery health",
+        "state": {
+          "fault": "Fault",
+          "off": "Off",
+          "ok": "OK",
+          "warning": "Warning"
+        }
       },
-      "battery_charge_power": {
-        "name": "Battery charge power"
+      "battery_max_charge_current": { "name": "Battery max charge current" },
+      "battery_max_discharge_current": { "name": "Battery max discharge current" },
+      "battery_max_voltage": { "name": "Battery max voltage" },
+      "battery_nominal_capacity": { "name": "Battery nominal capacity" },
+      "battery_state_of_charge": { "name": "Battery state of charge" },
+      "battery_temperature": { "name": "Battery temperature" },
+      "battery_temperature_max": { "name": "Battery temperature max" },
+      "battery_temperature_min": { "name": "Battery temperature min" },
+      "battery_voltage": { "name": "Battery voltage" },
+      "bms_operating_status": {
+        "name": "BMS operating status",
+        "state": {
+          "device_fault": "Device fault",
+          "off": "Off",
+          "waiting": "Waiting",
+          "standby": "Standby",
+          "battery_wait": "Battery wait"
+        }
       },
-      "battery_discharge_energy": {
-        "name": "Battery discharge energy"
-      },
-      "battery_discharge_power": {
-        "name": "Battery discharge power"
-      },
-      "battery_nominal_capacity": {
-        "name": "Battery nominal capacity"
-      },
-      "battery_state_of_charge": {
-        "name": "Battery state of charge"
-      },
-      "dc_energy_total_1": {
-        "name": "DC energy total string 1"
-      },
-      "dc_energy_total_2": {
-        "name": "DC energy total string 2"
-      },
-      "dc_energy_total_3": {
-        "name": "DC energy total string 3"
-      },
-      "dc_power_1": {
-        "name": "DC power string 1"
-      },
-      "dc_power_2": {
-        "name": "DC power string 2"
-      },
-      "dc_power_3": {
-        "name": "DC power string 3"
-      },
-      "dc_voltage_1": {
-        "name": "DC voltage string 1"
-      },
-      "dc_voltage_2": {
-        "name": "DC voltage string 2"
-      },
-      "dc_voltage_3": {
-        "name": "DC voltage string 3"
-      },
-      "grid_export_energy": {
-        "name": "Grid export energy"
-      },
-      "grid_export_power": {
-        "name": "Grid export power"
-      },
-      "grid_import_energy": {
-        "name": "Grid import energy"
-      },
-      "grid_import_power": {
-        "name": "Grid import power"
-      },
-      "pv_energy_total": {
-        "name": "PV energy total"
-      },
-      "pv_power": {
-        "name": "PV power"
-      },
+      "dc_current_0": { "name": "DC current string 0" },
+      "dc_current_1": { "name": "DC current string 1" },
+      "dc_current_2": { "name": "DC current string 2" },
+      "dc_energy_total_0": { "name": "DC energy total string 0" },
+      "dc_energy_total_1": { "name": "DC energy total string 1" },
+      "dc_energy_total_2": { "name": "DC energy total string 2" },
+      "dc_power_0": { "name": "DC power string 0" },
+      "dc_power_1": { "name": "DC power string 1" },
+      "dc_power_2": { "name": "DC power string 2" },
+      "dc_voltage_0": { "name": "DC voltage string 0" },
+      "dc_voltage_1": { "name": "DC voltage string 1" },
+      "dc_voltage_2": { "name": "DC voltage string 2" },
+      "grid_export_energy": { "name": "Grid export energy" },
+      "grid_export_power": { "name": "Grid export power" },
+      "grid_frequency": { "name": "Grid frequency" },
+      "grid_import_energy": { "name": "Grid import energy" },
+      "grid_import_power": { "name": "Grid import power" },
+      "insulation_resistance": { "name": "Insulation resistance" },
+      "insulation_residual_current": { "name": "Insulation residual current" },
+      "power_factor": { "name": "Power factor" },
+      "power_factor_eei": { "name": "Power factor (EEI)" },
+      "pv_energy_total": { "name": "PV energy total" },
+      "pv_power": { "name": "PV power" },
       "system_status": {
         "name": "System status",
         "state": {

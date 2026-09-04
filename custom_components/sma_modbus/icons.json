@@ -1,7 +1,31 @@
 {
   "entity": {
     "sensor": {
+      "battery_health": {
+        "default": "mdi:battery-heart",
+        "state": {
+          "fault": "mdi:battery-alert",
+          "off": "mdi:battery-off",
+          "ok": "mdi:battery-check",
+          "warning": "mdi:battery-alert-variant"
+        }
+      },
+      "bms_operating_status": {
+        "default": "mdi:circuit-board",
+        "state": {
+          "device_fault": "mdi:alert-circle-outline",
+          "off": "mdi:power-off",
+          "waiting": "mdi:timer-sand",
+          "standby": "mdi:power-standby",
+          "battery_wait": "mdi:battery-clock"
+        }
+      },
+      "insulation_resistance": { "default": "mdi:resistor" },
+      "insulation_residual_current": { "default": "mdi:current-ac" },
+      "power_factor": { "default": "mdi:alpha-p-box-outline" },
+      "power_factor_eei": { "default": "mdi:alpha-p-box-outline" },
       "system_status": {
+        "default": "mdi:information-outline",
         "state": {
           "ok": "mdi:check-circle-outline",
           "warning": "mdi:alert-outline",

@@ -1,6 +1,7 @@
 """Constants for the SMA Modbus integration."""
 
 from datetime import timedelta
+from enum import StrEnum
 from typing import Final
 
 from .sma_modbus import DeviceType
@@ -14,6 +15,17 @@ CONF_DEVICE_TYPE: Final = "device_type"
 
 DEFAULT_PORT: Final = 502
 DEFAULT_UNIT_ID: Final = 3
+
+
+class UnitOfElectricResistance(StrEnum):
+    """Electric resistance units."""
+
+    MICROOHM = "μΩ"
+    MILLIOHM = "mΩ"
+    OHM = "Ω"
+    KILOOHM = "kΩ"
+    MEGAOHM = "MΩ"
+
 
 # Default Modbus unit ID per device type: the Sunny Home Manager answers on
 # unit 2, inverters on unit 3.

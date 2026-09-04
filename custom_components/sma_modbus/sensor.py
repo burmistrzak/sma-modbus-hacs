@@ -16,7 +16,6 @@ from homeassistant.const import (
     UnitOfApparentPower,
     UnitOfElectricCurrent,
     UnitOfElectricPotential,
-    UnitOfElectricResistance,
     UnitOfEnergy,
     UnitOfFrequency,
     UnitOfPower,
@@ -28,6 +27,7 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.helpers.typing import StateType
 
 from . import SmaConfigEntry
+from .const import DEVICE_NAMES, DOMAIN, UnitOfElectricResistance
 from .coordinator import SmaCoordinator
 from .entity import SmaEntity
 from .sma_modbus import DeviceType

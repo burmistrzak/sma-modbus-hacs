@@ -1,0 +1,13 @@
+{
+  "entity": {
+    "sensor": {
+      "system_status": {
+        "state": {
+          "ok": "mdi:check-circle-outline",
+          "warning": "mdi:alert-outline",
+          "error": "mdi:alert-circle-outline"
+        }
+      }
+    }
+  }
+}

@@ -13,10 +13,12 @@ from typing import Final
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, Platform
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers import entity_registry as er
 from modbus_connection import ModbusTcpParams
 from modbus_connection.tmodbus import ModbusConnection
 
-from .const import CONF_DEVICE_TYPE, CONF_UNIT_ID, DEFAULT_PORT
+from .const import CONF_DEVICE_TYPE, CONF_UNIT_ID, DEFAULT_PORT, DOMAIN
 from .coordinator import SmaCoordinator
 from .sma_modbus import DEVICE_CLASSES, DeviceType
 
@@ -52,5 +54,23 @@ async def async_setup_entry(hass: HomeAssistant, entry: SmaConfigEntry) -> bool:
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: SmaConfigEntry) -> bool:
-    """Unload a config entry."""
-    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    """Unload a config entry and remove its devices and entities."""
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    if unload_ok:
+        _async_remove_devices_and_entities(hass, entry)
+    return unload_ok
+
+
+def _async_remove_devices_and_entities(
+    hass: HomeAssistant, entry: SmaConfigEntry
+) -> None:
+    """Remove all devices and entities for this config entry."""
+    ent_reg = er.async_get(hass)
+    dev_reg = dr.async_get(hass)
+
+    for device in dr.async_entries_for_config_entry(dev_reg, entry.entry_id):
+        for entity in er.async_entries_for_device(
+            ent_reg, device.id, include_disabled_entities=True
+        ):
+            ent_reg.async_remove(entity.entity_id)
+        dev_reg.async_remove_device(device.id)

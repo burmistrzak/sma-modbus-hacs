@@ -41,9 +41,14 @@ PARALLEL_UPDATES = 0
 class SmaSensorEntityDescription(SensorEntityDescription):
     """Describes an SMA sensor entity.
 
-    ``key`` is the attribute name on the library device component and the
-    entity translation key.
+    ``key`` is the attribute name on the library device component. The
+    ``translation_key`` defaults to ``key`` so entity names resolve through
+    ``strings.json`` automatically.
     """
+
+    def __post_init__(self) -> None:
+        if self.translation_key is None:
+            object.__setattr__(self, "translation_key", self.key)
 
 
 def _energy(
@@ -376,7 +381,6 @@ class SmaSensor(SmaEntity, SensorEntity):
     """Defines a SMA sensor entity."""
 
     entity_description: SmaSensorEntityDescription
-    _attr_has_entity_name = True
 
     def __init__(
         self,
@@ -387,7 +391,6 @@ class SmaSensor(SmaEntity, SensorEntity):
         super().__init__(coordinator)
         self.entity_description = description
         self._attr_unique_id = f"{coordinator.config_entry.unique_id}-{description.key}"
-        self._attr_translation_key = description.key
         self._attr_native_value = self._read_value()
 
     def _read_value(self) -> StateType:

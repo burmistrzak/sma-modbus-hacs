@@ -287,8 +287,8 @@ SENSOR_DESCRIPTIONS: Final[dict[DeviceType, list[SmaSensorEntityDescription]]] =
         _apparent_power("ac_apparent_power_l2", enabled_default=False),
         _apparent_power("ac_apparent_power_l3", enabled_default=False),
         # AC power factor
-        _power_factor("power_factor"),
-        _power_factor("power_factor_eei", enabled_default=False),
+        _power_factor("power_factor", enabled_default=False),
+        _power_factor("power_factor_eei"),
         # Battery
         _current("battery_current"),
         _battery("battery_state_of_charge"),

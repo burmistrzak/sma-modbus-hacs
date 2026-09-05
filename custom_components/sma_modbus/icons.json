@@ -20,12 +20,12 @@
           "battery_wait": "mdi:battery-clock"
         }
       },
-      "battery_temperature_max": { "default": "mdi:thermostat-high" },
-      "battery_temperature_min": { "default": "mdi:thermostat-low" },
+      "battery_temperature_max": { "default": "mdi:thermometer-high" },
+      "battery_temperature_min": { "default": "mdi:thermometer-low" },
       "insulation_resistance": { "default": "mdi:resistor" },
       "insulation_residual_current": { "default": "mdi:current-ac" },
-      "power_factor": { "default": "mdi:alpha-p-box-outline" },
-      "power_factor_eei": { "default": "mdi:alpha-p-box-outline" },
+      "power_factor": { "default": "mdi:math-cos" },
+      "power_factor_eei": { "default": "mdi:math-cos" },
       "system_status": {
         "default": "mdi:information-outline",
         "state": {

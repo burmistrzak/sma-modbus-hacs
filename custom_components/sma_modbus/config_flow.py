@@ -140,7 +140,7 @@ class SmaConfigFlow(ConfigFlow, domain=DOMAIN):
                 await self.async_set_unique_id(unique_id)
                 self._abort_if_unique_id_configured()
                 return self.async_create_entry(
-                    title=f"{DEVICE_NAMES[device_type]}",
+                    title=data[CONF_HOST],
                     data=data,
                 )
 

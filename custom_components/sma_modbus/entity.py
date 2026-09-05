@@ -55,7 +55,7 @@ class SmaEntity(CoordinatorEntity[SmaCoordinator]):
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, coordinator.config_entry.unique_id)},
             manufacturer=vendor.name if vendor else "SMA",
-            name=coordinator.config_entry.title,
+            name=f"SMA{serial_number}" if serial_number is not None else DEVICE_NAMES[coordinator.device_type],
             model=_MODEL_NAMES.get(device_type, DEVICE_NAMES[coordinator.device_type]),
             serial_number=str(serial_number) if serial_number is not None else None,
             sw_version=str(firmware_version) if firmware_version is not None else None,

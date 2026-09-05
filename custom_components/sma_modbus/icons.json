@@ -20,6 +20,8 @@
           "battery_wait": "mdi:battery-clock"
         }
       },
+      "battery_temperature_max": { "default": "mdi:thermostat-high" },
+      "battery_temperature_min": { "default": "mdi:thermostat-low" },
       "insulation_resistance": { "default": "mdi:resistor" },
       "insulation_residual_current": { "default": "mdi:current-ac" },
       "power_factor": { "default": "mdi:alpha-p-box-outline" },

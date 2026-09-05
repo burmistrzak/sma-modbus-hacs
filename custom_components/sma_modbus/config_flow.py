@@ -77,9 +77,12 @@ def _schema(device_type: DeviceType | None = None) -> vol.Schema:
     )
 
 
-async def _async_validate(hass: HomeAssistant, data: dict[str, Any]) -> DeviceType:
+async def _async_validate(
+    hass: HomeAssistant, data: dict[str, Any]
+) -> tuple[DeviceType, int | None]:
     """Probe the device by reading one refresh.
 
+    Returns the device type and serial number (if the device reports one).
     Raises CannotConnect on a Modbus error or an unreachable device.
     """
     params = ModbusTcpParams(host=data[CONF_HOST], port=data[CONF_PORT])
@@ -94,7 +97,8 @@ async def _async_validate(hass: HomeAssistant, data: dict[str, Any]) -> DeviceTy
     finally:
         with suppress(ModbusError, OSError):
             await connection.close()
-    return device_type
+    serial = getattr(device, "serial_number", None)
+    return device_type, serial
 
 
 class SmaConfigFlow(ConfigFlow, domain=DOMAIN):
@@ -116,21 +120,27 @@ class SmaConfigFlow(ConfigFlow, domain=DOMAIN):
                 CONF_UNIT_ID: int(user_input[CONF_UNIT_ID]),
             }
             try:
-                device_type = await _async_validate(self.hass, data)
+                device_type, serial = await _async_validate(self.hass, data)
             except CannotConnect:
                 errors["base"] = "cannot_connect"
             except Exception:
                 _LOGGER.exception("Unexpected exception")
                 errors["base"] = "unknown"
             else:
-                unique_id = (
-                    f"{data[CONF_HOST]}:{data[CONF_PORT]}"
-                    f":{data[CONF_UNIT_ID]}:{device_type.value}"
-                )
+                # Use the serial number as the unique ID when the device
+                # reports one (inverters); fall back to the connection
+                # parameters for devices without a Type Label block.
+                if serial is not None:
+                    unique_id = str(serial)
+                else:
+                    unique_id = (
+                        f"{data[CONF_HOST]}:{data[CONF_PORT]}"
+                        f":{data[CONF_UNIT_ID]}:{device_type.value}"
+                    )
                 await self.async_set_unique_id(unique_id)
                 self._abort_if_unique_id_configured()
                 return self.async_create_entry(
-                    title=f"SMA {DEVICE_NAMES[device_type]}",
+                    title=f"{DEVICE_NAMES[device_type]}",
                     data=data,
                 )
 

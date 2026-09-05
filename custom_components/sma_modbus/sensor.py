@@ -49,6 +49,7 @@ class SmaSensorEntityDescription(SensorEntityDescription):
 def _energy(
     key: str,
     suggested_unit: str = UnitOfEnergy.KILO_WATT_HOUR,
+    entity_category: EntityCategory | None = None,
 ) -> SmaSensorEntityDescription:
     return SmaSensorEntityDescription(
         key=key,
@@ -56,95 +57,138 @@ def _energy(
         device_class=SensorDeviceClass.ENERGY,
         state_class=SensorStateClass.TOTAL_INCREASING,
         suggested_unit_of_measurement=suggested_unit,
+        entity_category=entity_category,
     )
 
 
-def _power(key: str) -> SmaSensorEntityDescription:
+def _power(
+    key: str,
+    entity_category: EntityCategory | None = None,
+) -> SmaSensorEntityDescription:
     return SmaSensorEntityDescription(
         key=key,
         native_unit_of_measurement=UnitOfPower.WATT,
         device_class=SensorDeviceClass.POWER,
         state_class=SensorStateClass.MEASUREMENT,
+        entity_category=entity_category,
     )
 
 
-def _battery(key: str) -> SmaSensorEntityDescription:
+def _battery(
+    key: str,
+    entity_category: EntityCategory | None = None,
+) -> SmaSensorEntityDescription:
     return SmaSensorEntityDescription(
         key=key,
         native_unit_of_measurement=PERCENTAGE,
         device_class=SensorDeviceClass.BATTERY,
         state_class=SensorStateClass.MEASUREMENT,
+        entity_category=entity_category,
     )
 
 
-def _voltage(key: str) -> SmaSensorEntityDescription:
+def _voltage(
+    key: str,
+    entity_category: EntityCategory | None = None,
+) -> SmaSensorEntityDescription:
     return SmaSensorEntityDescription(
         key=key,
         native_unit_of_measurement=UnitOfElectricPotential.VOLT,
         device_class=SensorDeviceClass.VOLTAGE,
         state_class=SensorStateClass.MEASUREMENT,
         suggested_display_precision=0,
+        entity_category=entity_category,
     )
 
 
-def _current(key: str) -> SmaSensorEntityDescription:
+def _current(
+    key: str,
+    suggested_unit: str | None = None,
+    entity_category: EntityCategory | None = None,
+) -> SmaSensorEntityDescription:
     return SmaSensorEntityDescription(
         key=key,
         native_unit_of_measurement=UnitOfElectricCurrent.AMPERE,
         device_class=SensorDeviceClass.CURRENT,
         state_class=SensorStateClass.MEASUREMENT,
         suggested_display_precision=1,
+        suggested_unit_of_measurement=suggested_unit,
+        entity_category=entity_category,
     )
 
 
-def _frequency(key: str) -> SmaSensorEntityDescription:
+def _frequency(
+    key: str,
+    entity_category: EntityCategory | None = None,
+) -> SmaSensorEntityDescription:
     return SmaSensorEntityDescription(
         key=key,
         native_unit_of_measurement=UnitOfFrequency.HERTZ,
         device_class=SensorDeviceClass.FREQUENCY,
         state_class=SensorStateClass.MEASUREMENT,
         suggested_display_precision=2,
+        entity_category=entity_category,
     )
 
 
-def _temperature(key: str) -> SmaSensorEntityDescription:
+def _temperature(
+    key: str,
+    entity_category: EntityCategory | None = None,
+) -> SmaSensorEntityDescription:
     return SmaSensorEntityDescription(
         key=key,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         device_class=SensorDeviceClass.TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
         suggested_display_precision=1,
+        entity_category=entity_category,
     )
 
 
-def _apparent_power(key: str) -> SmaSensorEntityDescription:
+def _apparent_power(
+    key: str,
+    entity_category: EntityCategory | None = None,
+) -> SmaSensorEntityDescription:
     return SmaSensorEntityDescription(
         key=key,
         native_unit_of_measurement=UnitOfApparentPower.VOLT_AMPERE,
         device_class=SensorDeviceClass.APPARENT_POWER,
         state_class=SensorStateClass.MEASUREMENT,
+        entity_category=entity_category,
     )
 
 
-def _reactive_power(key: str) -> SmaSensorEntityDescription:
+def _reactive_power(
+    key: str,
+    entity_category: EntityCategory | None = None,
+) -> SmaSensorEntityDescription:
     return SmaSensorEntityDescription(
         key=key,
         native_unit_of_measurement=UnitOfReactivePower.VOLT_AMPERE_REACTIVE,
         device_class=SensorDeviceClass.REACTIVE_POWER,
         state_class=SensorStateClass.MEASUREMENT,
+        entity_category=entity_category,
     )
 
 
-def _power_factor(key: str) -> SmaSensorEntityDescription:
+def _power_factor(
+    key: str,
+    entity_category: EntityCategory | None = None,
+) -> SmaSensorEntityDescription:
     return SmaSensorEntityDescription(
         key=key,
         device_class=SensorDeviceClass.POWER_FACTOR,
         state_class=SensorStateClass.MEASUREMENT,
         suggested_display_precision=3,
+        entity_category=entity_category,
     )
 
 
-def _enum(key: str, enum_type: type[IntEnum]) -> SmaSensorEntityDescription:
+def _enum(
+    key: str,
+    enum_type: type[IntEnum],
+    entity_category: EntityCategory | None = None,
+) -> SmaSensorEntityDescription:
     """Create an ENUM sensor description for a typed status field.
 
     The library returns an ``IntEnum`` member (or ``None`` on the sentinel);
@@ -156,20 +200,19 @@ def _enum(key: str, enum_type: type[IntEnum]) -> SmaSensorEntityDescription:
         key=key,
         device_class=SensorDeviceClass.ENUM,
         options=[member.name.lower() for member in enum_type],
+        entity_category=entity_category,
     )
 
 
-def _diagnostic(
+def _ohm(
     key: str,
-    unit: str | None = None,
-    device_class: SensorDeviceClass | None = None,
+    entity_category: EntityCategory | None = None,
 ) -> SmaSensorEntityDescription:
     return SmaSensorEntityDescription(
         key=key,
-        entity_category=EntityCategory.DIAGNOSTIC,
+        native_unit_of_measurement=UnitOfElectricResistance.OHM,
         state_class=SensorStateClass.MEASUREMENT,
-        native_unit_of_measurement=unit,
-        device_class=device_class,
+        entity_category=entity_category,
     )
 
 
@@ -220,8 +263,8 @@ SENSOR_DESCRIPTIONS: Final[dict[DeviceType, list[SmaSensorEntityDescription]]] =
         # Battery
         _current("battery_current"),
         _battery("battery_state_of_charge"),
-        _battery("battery_nominal_capacity"),
-        _diagnostic("battery_temperature", UnitOfTemperature.CELSIUS, SensorDeviceClass.TEMPERATURE),
+        _battery("battery_nominal_capacity", EntityCategory.DIAGNOSTIC),
+        _temperature("battery_temperature", EntityCategory.DIAGNOSTIC),
         _voltage("battery_voltage"),
         _power("battery_charge_power"),
         _power("battery_discharge_power"),
@@ -229,8 +272,8 @@ SENSOR_DESCRIPTIONS: Final[dict[DeviceType, list[SmaSensorEntityDescription]]] =
         _energy("battery_discharge_energy"),
         _enum("battery_health", BatteryHealth),
         _voltage("battery_max_voltage"),
-        _diagnostic("battery_temperature_max", UnitOfTemperature.CELSIUS, SensorDeviceClass.TEMPERATURE),
-        _diagnostic("battery_temperature_min", UnitOfTemperature.CELSIUS, SensorDeviceClass.TEMPERATURE),
+        _temperature("battery_temperature_max", EntityCategory.DIAGNOSTIC),
+        _temperature("battery_temperature_min", EntityCategory.DIAGNOSTIC),
         _voltage("battery_end_of_charge_voltage"),
         _voltage("battery_end_of_discharge_voltage"),
         _current("battery_max_charge_current"),
@@ -255,8 +298,12 @@ SENSOR_DESCRIPTIONS: Final[dict[DeviceType, list[SmaSensorEntityDescription]]] =
         _current("dc_current_1"),
         _current("dc_current_2"),
         # Insulation
-        _diagnostic("insulation_resistance", UnitOfElectricResistance.OHM),
-        _diagnostic("insulation_residual_current", UnitOfElectricCurrent.AMPERE, SensorDeviceClass.CURRENT),
+        _ohm("insulation_resistance", EntityCategory.DIAGNOSTIC),
+        _current(
+            "insulation_residual_current",
+            UnitOfElectricCurrent.MILLIAMPERE,
+            EntityCategory.DIAGNOSTIC,
+        ),
     ],
     DeviceType.SUNNY_BOY: [
         # PV
@@ -302,13 +349,13 @@ SENSOR_DESCRIPTIONS: Final[dict[DeviceType, list[SmaSensorEntityDescription]]] =
         _current("dc_current_0"),
         _current("dc_current_1"),
         # Insulation
-        _diagnostic("insulation_resistance", UnitOfElectricResistance.OHM),
-        _diagnostic("insulation_residual_current", UnitOfElectricCurrent.AMPERE, SensorDeviceClass.CURRENT),
+        _ohm("insulation_resistance", EntityCategory.DIAGNOSTIC),
+        _current(
+            "insulation_residual_current",
+            UnitOfElectricCurrent.MILLIAMPERE,
+            EntityCategory.DIAGNOSTIC,
+        ),
     ],
-}
-
-_ENTITY_CATEGORY: Final[dict[str, EntityCategory]] = {
-    "battery_nominal_capacity": EntityCategory.DIAGNOSTIC,
 }
 
 
@@ -329,6 +376,7 @@ class SmaSensor(SmaEntity, SensorEntity):
     """Defines a SMA sensor entity."""
 
     entity_description: SmaSensorEntityDescription
+    _attr_has_entity_name = True
 
     def __init__(
         self,
@@ -340,8 +388,6 @@ class SmaSensor(SmaEntity, SensorEntity):
         self.entity_description = description
         self._attr_unique_id = f"{coordinator.config_entry.unique_id}-{description.key}"
         self._attr_translation_key = description.key
-        if (category := _ENTITY_CATEGORY.get(description.key)) is not None:
-            self._attr_entity_category = category
         self._attr_native_value = self._read_value()
 
     def _read_value(self) -> StateType:

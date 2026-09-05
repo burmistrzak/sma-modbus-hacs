@@ -38,7 +38,7 @@ DEFAULT_UNIT_IDS: dict[DeviceType, int] = {
 SCAN_INTERVAL: Final = timedelta(seconds=30)
 
 DEVICE_NAMES: dict[DeviceType, str] = {
-    DeviceType.SUNNY_HOME_MANAGER: "Sunny Home Manager",
-    DeviceType.SUNNY_BOY_SMART_ENERGY: "Sunny Boy Smart Energy",
-    DeviceType.SUNNY_BOY: "Sunny Boy",
+    DeviceType.SUNNY_HOME_MANAGER: "Sunny Home Manager 2.0",
+    DeviceType.SUNNY_BOY_SMART_ENERGY: "Sunny Boy Smart Energy 3.6-6.0",
+    DeviceType.SUNNY_BOY: "Sunny Boy 3.0-6.0",
 }

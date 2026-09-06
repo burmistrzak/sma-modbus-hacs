@@ -21,7 +21,7 @@ from homeassistant.helpers.selector import (
     SelectSelectorMode,
     TextSelector,
 )
-from homeassistant.helpers.service_info.dhcp import DhcpServiceInfo
+from homeassistant.helpers.service_info.zeroconf import ZeroconfServiceInfo
 from modbus_connection import ModbusError, ModbusTcpParams
 from modbus_connection.tmodbus import ModbusConnection
 
@@ -104,14 +104,14 @@ class SmaConfigFlow(ConfigFlow, domain=DOMAIN):
         """Initialize the config flow."""
         self._dhcp_host: str | None = None
 
-    async def async_step_dhcp(
-        self, discovery_info: DhcpServiceInfo
+    async def async_step_zeroconf(
+        self, discovery_info: ZeroconfServiceInfo
     ) -> ConfigFlowResult:
-        """Handle DHCP discovery."""
-        self._dhcp_host = discovery_info.ip
+        """Handle Zeroconf discovery."""
+        self._dhcp_host = discovery_info.host
         # Abort if an entry with this host already exists.
         for entry in self._async_current_entries(include_ignore=False):
-            if entry.data.get(CONF_HOST) == discovery_info.ip:
+            if entry.data.get(CONF_HOST) == discovery_info.host:
                 self._abort_if_unique_id_configured()
                 return self.async_abort(reason="already_configured")
         return await self.async_step_user()

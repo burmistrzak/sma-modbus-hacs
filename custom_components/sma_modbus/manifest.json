@@ -3,13 +3,21 @@
   "name": "SMA Modbus",
   "codeowners": ["@burmistrzak"],
   "config_flow": true,
-  "dhcp": [
+  "zeroconf": [
     {
-      "hostname": "sma*",
-      "macaddress": "0015BB*"
+      "type": "_http._tcp.local.",
+      "name": "Website for SMA-Inverter: SMA*"
     },
     {
-      "registered_devices": true
+      "type": "_http._tcp.local.",
+      "name": "Website for SMA-Product: SMA*"
+    },
+    {
+      "type": "_http._tcp.local.",
+      "name": "Website on SMA*",
+      "properties": {
+        "path": "/legal_notices.txt"
+      }
     }
   ],
   "documentation": "https://github.com/burmistrzak/sma-modbus-hacs",

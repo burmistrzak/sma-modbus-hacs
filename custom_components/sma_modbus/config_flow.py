@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from contextlib import suppress
 from typing import Any
 
@@ -73,6 +74,16 @@ def _schema(suggested_values: dict[str, Any] | None = None) -> vol.Schema:
     )
 
 
+def _extract_serial(hostname: str) -> str | None:
+    """Extract the serial number from an SMA mDNS hostname.
+
+    SMA devices advertise hostnames like ``SMA12345678.local``.
+    Returns the numeric serial as a string, or ``None``.
+    """
+    match = re.match(r"SMA(\d+)", hostname, re.IGNORECASE)
+    return match.group(1) if match else None
+
+
 async def _async_validate(
     hass: HomeAssistant, data: dict[str, Any]
 ) -> int | None:
@@ -95,6 +106,29 @@ async def _async_validate(
     return getattr(device, "serial_number", None)
 
 
+async def _async_probe_device_type(
+    host: str, port: int
+) -> DeviceType | None:
+    """Try each device type until one answers.
+
+    Returns the first matching ``DeviceType`` or ``None``.
+    """
+    for device_type in DeviceType:
+        params = ModbusTcpParams(host=host, port=port)
+        connection = ModbusConnection(params)
+        try:
+            device = DEVICE_CLASSES[device_type](connection)
+            await device.async_update()
+        except (ModbusError, OSError):
+            continue
+        else:
+            return device_type
+        finally:
+            with suppress(ModbusError, OSError):
+                await connection.close()
+    return None
+
+
 class SmaConfigFlow(ConfigFlow, domain=DOMAIN):
     """Handle a config flow for SMA."""
 
@@ -102,19 +136,61 @@ class SmaConfigFlow(ConfigFlow, domain=DOMAIN):
 
     def __init__(self) -> None:
         """Initialize the config flow."""
-        self._dhcp_host: str | None = None
+        self._discovered_data: dict[str, Any] = {}
 
     async def async_step_zeroconf(
         self, discovery_info: ZeroconfServiceInfo
     ) -> ConfigFlowResult:
-        """Handle Zeroconf discovery."""
-        self._dhcp_host = discovery_info.host
-        # Abort if an entry with this host already exists.
-        for entry in self._async_current_entries(include_ignore=False):
-            if entry.data.get(CONF_HOST) == discovery_info.host:
-                self._abort_if_unique_id_configured()
-                return self.async_abort(reason="already_configured")
-        return await self.async_step_user()
+        """Handle Zeroconf discovery.
+
+        Extracts the serial from the mDNS hostname (``SMA<serial>.local``),
+        sets the unique ID, and probes the device to determine its type.
+        If already configured, updates the host if it changed.
+        """
+        host = discovery_info.host
+        serial = _extract_serial(discovery_info.hostname)
+        if serial is None:
+            # No serial in hostname — fall through to manual setup.
+            self._discovered_data = {CONF_HOST: host}
+            return await self.async_step_user()
+
+        unique_id = f"SMA{serial}"
+        await self.async_set_unique_id(unique_id)
+        self._abort_if_unique_id_configured(updates={CONF_HOST: host})
+
+        # Probe the device to determine its type.
+        device_type = await _async_probe_device_type(host, DEFAULT_PORT)
+        if device_type is None:
+            # Can't determine type — fall through to manual setup.
+            self._discovered_data = {CONF_HOST: host}
+            return await self.async_step_user()
+
+        self._discovered_data = {
+            CONF_DEVICE_TYPE: device_type.value,
+            CONF_HOST: host,
+            CONF_PORT: DEFAULT_PORT,
+        }
+        return await self.async_step_discovery_confirm()
+
+    async def async_step_discovery_confirm(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Confirm discovery."""
+        if user_input is not None:
+            return self.async_create_entry(
+                title=self._discovered_data[CONF_HOST],
+                data=self._discovered_data,
+            )
+
+        self._set_confirm_only()
+        return self.async_show_form(
+            step_id="discovery_confirm",
+            description_placeholders={
+                "device": DEVICE_NAMES[
+                    DeviceType(self._discovered_data[CONF_DEVICE_TYPE])
+                ],
+            },
+        )
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
@@ -139,9 +215,11 @@ class SmaConfigFlow(ConfigFlow, domain=DOMAIN):
                 if serial is None:
                     errors["base"] = "no_serial"
                 else:
-                    unique_id = str(serial)
+                    unique_id = f"SMA{serial}"
                     await self.async_set_unique_id(unique_id)
-                    self._abort_if_unique_id_configured()
+                    self._abort_if_unique_id_configured(
+                        updates={CONF_HOST: data[CONF_HOST]}
+                    )
                     return self.async_create_entry(
                         title=data[CONF_HOST],
                         data=data,
@@ -149,9 +227,7 @@ class SmaConfigFlow(ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="user",
-            data_schema=_schema(
-                {CONF_HOST: self._dhcp_host} if self._dhcp_host else None
-            ),
+            data_schema=_schema(self._discovered_data or None),
             errors=errors,
         )
 

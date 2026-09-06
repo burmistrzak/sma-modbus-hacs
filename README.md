@@ -7,10 +7,10 @@ The device-specific communication lives in the `sma_modbus` library, which is
 is self-contained and installable through [HACS](https://hacs.xyz).
 
 > [!WARNING]
-> This is an experimental, partial agentic port of the core [Fronius](https://github.com/home-assistant/core/tree/dev/homeassistant/components/fronius) component.
+> This is a **beta** integration, based on a partial agentic port of the core [Fronius](https://github.com/home-assistant/core/tree/dev/homeassistant/components/fronius) component.
 > 
-> While the integration _does work_, do not use it for anything else than testing
-> and reporting bugs.
+> While everything _works_ on my end, do not use it for anything else than testing
+> and reporting bugs just yet.
 >
 > **You have been warned.**
 
@@ -21,7 +21,7 @@ is self-contained and installable through [HACS](https://hacs.xyz).
 - **Sunny Boy Smart Energy 3.6-6.0**
 - **Sunny Boy 3.0-6.0**
 
-Only essential parameters are supported _at this point_. Support for many more Modbus parameter is planned, but most of them will be disabled by default to keep the inverter's system-load under control.
+Only _essential parameters_ are enabled by default.
 
 
 ## Installation (HACS)
@@ -38,7 +38,7 @@ Only essential parameters are supported _at this point_. Support for many more M
 
 - Home Assistant 2026.9.0 or later
 - `modbus-connection[tmodbus]` is installed automatically from `manifest.json`
-  `requirements`.
+  requirements.
 
 
 ## Development

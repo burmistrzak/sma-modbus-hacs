@@ -26,9 +26,7 @@ from modbus_connection.tmodbus import ModbusConnection
 
 from .const import (
     CONF_DEVICE_TYPE,
-    CONF_UNIT_ID,
     DEFAULT_PORT,
-    DEFAULT_UNIT_IDS,
     DEVICE_NAMES,
     DOMAIN,
 )
@@ -39,9 +37,6 @@ _LOGGER = logging.getLogger(__name__)
 _PORT = NumberSelector(
     NumberSelectorConfig(min=1, max=65535, step=1, mode=NumberSelectorMode.BOX)
 )
-_UNIT = NumberSelector(
-    NumberSelectorConfig(min=1, max=247, step=1, mode=NumberSelectorMode.BOX)
-)
 
 
 def _device_options() -> list[SelectOptionDict]:
@@ -51,17 +46,8 @@ def _device_options() -> list[SelectOptionDict]:
     ]
 
 
-def _schema(device_type: DeviceType | None = None) -> vol.Schema:
-    """Build the user form schema.
-
-    The unit ID default follows the selected device type: 2 for the Sunny
-    Home Manager, 3 for inverters.
-    """
-    default_unit = (
-        DEFAULT_UNIT_IDS[device_type]
-        if device_type
-        else next(iter(DEFAULT_UNIT_IDS.values()))
-    )
+def _schema() -> vol.Schema:
+    """Build the user form schema."""
     return vol.Schema(
         {
             vol.Required(CONF_DEVICE_TYPE): SelectSelector(
@@ -72,33 +58,30 @@ def _schema(device_type: DeviceType | None = None) -> vol.Schema:
             ),
             vol.Required(CONF_HOST): TextSelector(),
             vol.Required(CONF_PORT, default=DEFAULT_PORT): _PORT,
-            vol.Required(CONF_UNIT_ID, default=default_unit): _UNIT,
         }
     )
 
 
 async def _async_validate(
     hass: HomeAssistant, data: dict[str, Any]
-) -> tuple[DeviceType, int | None]:
+) -> int | None:
     """Probe the device by reading one refresh.
 
-    Returns the device type and serial number (if the device reports one).
+    Returns the serial number if the device reports one.
     Raises CannotConnect on a Modbus error or an unreachable device.
     """
     params = ModbusTcpParams(host=data[CONF_HOST], port=data[CONF_PORT])
     device_type = DeviceType(data[CONF_DEVICE_TYPE])
     connection = ModbusConnection(params)
     try:
-        unit = connection.for_unit(data[CONF_UNIT_ID])
-        device = DEVICE_CLASSES[device_type](unit)
+        device = DEVICE_CLASSES[device_type](connection)
         await device.async_update()
     except (ModbusError, OSError) as err:
         raise CannotConnect from err
     finally:
         with suppress(ModbusError, OSError):
             await connection.close()
-    serial = getattr(device, "serial_number", None)
-    return device_type, serial
+    return getattr(device, "serial_number", None)
 
 
 class SmaConfigFlow(ConfigFlow, domain=DOMAIN):
@@ -117,40 +100,29 @@ class SmaConfigFlow(ConfigFlow, domain=DOMAIN):
                 CONF_DEVICE_TYPE: user_input[CONF_DEVICE_TYPE],
                 CONF_HOST: str(user_input[CONF_HOST]).strip(),
                 CONF_PORT: int(user_input[CONF_PORT]),
-                CONF_UNIT_ID: int(user_input[CONF_UNIT_ID]),
             }
             try:
-                device_type, serial = await _async_validate(self.hass, data)
+                serial = await _async_validate(self.hass, data)
             except CannotConnect:
                 errors["base"] = "cannot_connect"
             except Exception:
                 _LOGGER.exception("Unexpected exception")
                 errors["base"] = "unknown"
             else:
-                # Use the serial number as the unique ID when the device
-                # reports one (inverters); fall back to the connection
-                # parameters for devices without a Type Label block.
-                if serial is not None:
-                    unique_id = str(serial)
+                if serial is None:
+                    errors["base"] = "no_serial"
                 else:
-                    unique_id = (
-                        f"{data[CONF_HOST]}:{data[CONF_PORT]}"
-                        f":{data[CONF_UNIT_ID]}:{device_type.value}"
+                    unique_id = str(serial)
+                    await self.async_set_unique_id(unique_id)
+                    self._abort_if_unique_id_configured()
+                    return self.async_create_entry(
+                        title=data[CONF_HOST],
+                        data=data,
                     )
-                await self.async_set_unique_id(unique_id)
-                self._abort_if_unique_id_configured()
-                return self.async_create_entry(
-                    title=data[CONF_HOST],
-                    data=data,
-                )
 
         return self.async_show_form(
             step_id="user",
-            data_schema=_schema(
-                DeviceType(user_input[CONF_DEVICE_TYPE])
-                if user_input and CONF_DEVICE_TYPE in user_input
-                else None
-            ),
+            data_schema=_schema(),
             errors=errors,
         )
 

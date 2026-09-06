@@ -5,6 +5,7 @@
     },
     "error": {
       "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
+      "no_serial": "The device did not report a serial number, which is needed to identify it.",
       "unknown": "[%key:common::config_flow::error::unknown%]"
     },
     "step": {
@@ -12,13 +13,11 @@
         "data": {
           "device_type": "Device type",
           "host": "[%key:common::config_flow::data::host%]",
-          "port": "Modbus port",
-          "unit_id": "Modbus unit ID"
+          "port": "Modbus port"
         },
         "data_description": {
           "host": "The IP address or hostname of your SMA device.",
-          "port": "Port of the device's Modbus TCP interface. Only used when Modbus is enabled on the device.",
-          "unit_id": "The Modbus slave address of the device (Sunny Home Manager: 2, inverters: 3)."
+          "port": "Port of the device's Modbus TCP interface. Only used when Modbus is enabled on the device."
         },
         "description": "Configure your SMA Modbus TCP device."
       }

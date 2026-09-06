@@ -8,12 +8,14 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from .const import DEVICE_NAMES, DOMAIN
 from .coordinator import SmaCoordinator
 from .sma_modbus import SmaComponent
+from .sma_modbus.home_manager import SunnyHomeManagerModel
 from .sma_modbus.sunny_boy import SunnyBoyModel
 from .sma_modbus.sunny_boy_smart_energy import SunnyBoySmartEnergyModel
 
-# Human-readable product names for each inverter model, sourced from the
+# Human-readable product names for each device model, sourced from the
 # SMA Modbus parameter lists.
 _MODEL_NAMES: dict[IntEnum, str] = {
+    SunnyHomeManagerModel.SUNNY_HOME_MANAGER: "Sunny Home Manager 2.0",
     SunnyBoyModel.SB_3_0: "Sunny Boy 3.0",
     SunnyBoyModel.SB_3_6: "Sunny Boy 3.6",
     SunnyBoyModel.SB_4_0: "Sunny Boy 4.0",
@@ -44,9 +46,9 @@ class SmaEntity(CoordinatorEntity[SmaCoordinator]):
         super().__init__(coordinator)
         device = coordinator.device
 
-        # Fields that are only present on the inverter models (Sunny Boy and
-        # Sunny Boy Smart Energy); the Sunny Home Manager has no Type Label
-        # block, so fall back to static defaults for it.
+        # Type Label fields (vendor, serial, firmware, device_type) are
+        # available on all device models; fall back to static defaults when
+        # a device does not report them.
         vendor = getattr(device, "vendor", None)
         device_type = getattr(device, "device_type", None)
         serial_number = getattr(device, "serial_number", None)

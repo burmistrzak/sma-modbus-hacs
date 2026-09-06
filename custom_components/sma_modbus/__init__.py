@@ -17,7 +17,7 @@ from homeassistant.helpers import device_registry as dr
 from modbus_connection import ModbusTcpParams
 from modbus_connection.tmodbus import ModbusConnection
 
-from .const import CONF_DEVICE_TYPE, CONF_UNIT_ID, DEFAULT_PORT
+from .const import CONF_DEVICE_TYPE, DEFAULT_PORT
 from .coordinator import SmaCoordinator
 from .sma_modbus import DEVICE_CLASSES, DeviceType
 
@@ -35,14 +35,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: SmaConfigEntry) -> bool:
     """
     host: str = entry.data[CONF_HOST]
     port: int = entry.data.get(CONF_PORT, DEFAULT_PORT)
-    unit_id: int = entry.data[CONF_UNIT_ID]
     device_type = DeviceType(entry.data[CONF_DEVICE_TYPE])
 
     connection = ModbusConnection(ModbusTcpParams(host=host, port=port))
     entry.async_on_unload(connection.close)
 
-    unit = connection.for_unit(unit_id)
-    device = DEVICE_CLASSES[device_type](unit)
+    device = DEVICE_CLASSES[device_type](connection)
 
     coordinator = SmaCoordinator(hass, entry, device, device_type)
     await coordinator.async_config_entry_first_refresh()

@@ -19,7 +19,7 @@ is self-contained and installable through [HACS](https://hacs.xyz).
 
 - **Sunny Home Manager 2.0**
 - **Sunny Boy Smart Energy 3.6-6.0**
-- **Sunny Boy 3.6-6.0**
+- **Sunny Boy 3.0-6.0**
 
 Only essential parameters are supported _at this point_. Support for many more Modbus parameter is planned, but most of them will be disabled by default to keep the inverter's system-load under control.
 
@@ -30,8 +30,7 @@ Only essential parameters are supported _at this point_. Support for many more M
    (*HACS → Integrations → ⋮ → Custom repositories*, category *Integration*).
 2. Install **SMA Modbus**, then restart Home Assistant.
 3. *Settings → Devices & Services → Add integration → SMA Modbus*.
-4. Pick your device type, enter the IP/hostname, Modbus port (default 502) and
-   unit ID (Home Manager: 2, inverters: 3).
+4. Pick your device type and enter the IP/hostname and Modbus port (default 502).
 
 > Modbus must be enabled on the device.
 

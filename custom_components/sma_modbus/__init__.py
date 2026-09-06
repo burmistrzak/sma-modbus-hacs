@@ -13,7 +13,6 @@ from typing import Final
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, Platform
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import device_registry as dr
 from modbus_connection import ModbusTcpParams
 from modbus_connection.tmodbus import ModbusConnection
 
@@ -53,18 +52,3 @@ async def async_setup_entry(hass: HomeAssistant, entry: SmaConfigEntry) -> bool:
 async def async_unload_entry(hass: HomeAssistant, entry: SmaConfigEntry) -> bool:
     """Unload a config entry."""
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
-
-
-async def async_remove_config_entry_device(
-    hass: HomeAssistant,
-    config_entry: SmaConfigEntry,
-    device_entry: dr.DeviceEntry,
-) -> bool:
-    """Remove a device from a config entry.
-
-    Allows the user to manually remove the device from the UI when it is no
-    longer reachable.  We allow removal if the coordinator's last update
-    failed (the device is not communicating).
-    """
-    coordinator = config_entry.runtime_data
-    return coordinator.last_update_success is False

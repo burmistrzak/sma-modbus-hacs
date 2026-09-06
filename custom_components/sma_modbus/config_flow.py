@@ -21,6 +21,7 @@ from homeassistant.helpers.selector import (
     SelectSelectorMode,
     TextSelector,
 )
+from homeassistant.helpers.service_info.dhcp import DhcpServiceInfo
 from modbus_connection import ModbusError, ModbusTcpParams
 from modbus_connection.tmodbus import ModbusConnection
 
@@ -46,18 +47,28 @@ def _device_options() -> list[SelectOptionDict]:
     ]
 
 
-def _schema() -> vol.Schema:
+def _schema(suggested_values: dict[str, Any] | None = None) -> vol.Schema:
     """Build the user form schema."""
+    suggested = suggested_values or {}
     return vol.Schema(
         {
-            vol.Required(CONF_DEVICE_TYPE): SelectSelector(
+            vol.Required(
+                CONF_DEVICE_TYPE,
+                default=suggested.get(CONF_DEVICE_TYPE),
+            ): SelectSelector(
                 SelectSelectorConfig(
                     options=_device_options(),
                     mode=SelectSelectorMode.DROPDOWN,
                 )
             ),
-            vol.Required(CONF_HOST): TextSelector(),
-            vol.Required(CONF_PORT, default=DEFAULT_PORT): _PORT,
+            vol.Required(
+                CONF_HOST,
+                default=suggested.get(CONF_HOST),
+            ): TextSelector(),
+            vol.Required(
+                CONF_PORT,
+                default=suggested.get(CONF_PORT, DEFAULT_PORT),
+            ): _PORT,
         }
     )
 
@@ -88,6 +99,22 @@ class SmaConfigFlow(ConfigFlow, domain=DOMAIN):
     """Handle a config flow for SMA."""
 
     VERSION = 1
+
+    def __init__(self) -> None:
+        """Initialize the config flow."""
+        self._dhcp_host: str | None = None
+
+    async def async_step_dhcp(
+        self, discovery_info: DhcpServiceInfo
+    ) -> ConfigFlowResult:
+        """Handle DHCP discovery."""
+        self._dhcp_host = discovery_info.ip
+        # Abort if an entry with this host already exists.
+        for entry in self._async_current_entries(include_ignore=False):
+            if entry.data.get(CONF_HOST) == discovery_info.ip:
+                self._abort_if_unique_id_configured()
+                return self.async_abort(reason="already_configured")
+        return await self.async_step_user()
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
@@ -122,7 +149,9 @@ class SmaConfigFlow(ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="user",
-            data_schema=_schema(),
+            data_schema=_schema(
+                {CONF_HOST: self._dhcp_host} if self._dhcp_host else None
+            ),
             errors=errors,
         )
 

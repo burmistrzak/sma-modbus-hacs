@@ -3,6 +3,15 @@
   "name": "SMA Modbus",
   "codeowners": ["@burmistrzak"],
   "config_flow": true,
+  "dhcp": [
+    {
+      "hostname": "sma*",
+      "macaddress": "0015BB*"
+    },
+    {
+      "registered_devices": true
+    }
+  ],
   "documentation": "https://github.com/burmistrzak/sma-modbus-hacs",
   "integration_type": "device",
   "iot_class": "local_polling",

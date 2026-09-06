@@ -107,9 +107,9 @@ async def _async_validate(
 
 
 async def _async_probe_device_type(
-    host: str, port: int
+    host: str, port: int, expected_serial: str
 ) -> DeviceType | None:
-    """Try each device type until one answers.
+    """Try each device type until one answers with the expected serial.
 
     Returns the first matching ``DeviceType`` or ``None``.
     """
@@ -122,7 +122,13 @@ async def _async_probe_device_type(
         except (ModbusError, OSError):
             continue
         else:
-            return device_type
+            # Verify the device's serial matches the one from mDNS.
+            # Every SMA device also serves its Type Label on unit 1, so
+            # probing with a different device class may succeed even when
+            # the measurement unit ID doesn't match. Checking the serial
+            # ensures we've found the right device.
+            if str(getattr(device, "serial_number", None)) == expected_serial:
+                return device_type
         finally:
             with suppress(ModbusError, OSError):
                 await connection.close()
@@ -159,7 +165,7 @@ class SmaConfigFlow(ConfigFlow, domain=DOMAIN):
         self._abort_if_unique_id_configured(updates={CONF_HOST: host})
 
         # Probe the device to determine its type.
-        device_type = await _async_probe_device_type(host, DEFAULT_PORT)
+        device_type = await _async_probe_device_type(host, DEFAULT_PORT, serial)
         if device_type is None:
             # Can't determine type — fall through to manual setup.
             self._discovered_data = {CONF_HOST: host}

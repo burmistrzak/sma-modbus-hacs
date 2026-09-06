@@ -16,23 +16,14 @@ from homeassistant.helpers.selector import (
     NumberSelector,
     NumberSelectorConfig,
     NumberSelectorMode,
-    SelectOptionDict,
-    SelectSelector,
-    SelectSelectorConfig,
-    SelectSelectorMode,
     TextSelector,
 )
 from homeassistant.helpers.service_info.zeroconf import ZeroconfServiceInfo
 from modbus_connection import ModbusError, ModbusTcpParams
 from modbus_connection.tmodbus import ModbusConnection
 
-from .const import (
-    CONF_DEVICE_TYPE,
-    DEFAULT_PORT,
-    DEVICE_NAMES,
-    DOMAIN,
-)
-from .sma_modbus import DEVICE_CLASSES, DeviceType
+from .const import CONF_DEVICE_TYPE, DEFAULT_PORT, DEVICE_NAMES, DOMAIN
+from .sma_modbus import DeviceType, DiscoveryInfo, discover
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -41,27 +32,11 @@ _PORT = NumberSelector(
 )
 
 
-def _device_options() -> list[SelectOptionDict]:
-    return [
-        SelectOptionDict(value=device_type.value, label=DEVICE_NAMES[device_type])
-        for device_type in DeviceType
-    ]
-
-
 def _schema(suggested_values: dict[str, Any] | None = None) -> vol.Schema:
     """Build the user form schema."""
     suggested = suggested_values or {}
     return vol.Schema(
         {
-            vol.Required(
-                CONF_DEVICE_TYPE,
-                default=suggested.get(CONF_DEVICE_TYPE),
-            ): SelectSelector(
-                SelectSelectorConfig(
-                    options=_device_options(),
-                    mode=SelectSelectorMode.DROPDOWN,
-                )
-            ),
             vol.Required(
                 CONF_HOST,
                 default=suggested.get(CONF_HOST),
@@ -84,55 +59,21 @@ def _extract_serial(hostname: str) -> str | None:
     return match.group(1) if match else None
 
 
-async def _async_validate(
-    hass: HomeAssistant, data: dict[str, Any]
-) -> int | None:
-    """Probe the device by reading one refresh.
+async def _async_discover(
+    host: str, port: int
+) -> DiscoveryInfo | None:
+    """Discover the SMA device at ``host:port``.
 
-    Returns the serial number if the device reports one.
-    Raises CannotConnect on a Modbus error or an unreachable device.
+    Returns a :class:`DiscoveryInfo` or ``None`` on failure.
     """
-    params = ModbusTcpParams(host=data[CONF_HOST], port=data[CONF_PORT])
-    device_type = DeviceType(data[CONF_DEVICE_TYPE])
-    connection = ModbusConnection(params)
+    connection = ModbusConnection(ModbusTcpParams(host=host, port=port))
     try:
-        device = DEVICE_CLASSES[device_type](connection)
-        await device.async_update()
-    except (ModbusError, OSError) as err:
-        raise CannotConnect from err
+        return await discover(connection)
+    except (ModbusError, OSError):
+        return None
     finally:
         with suppress(ModbusError, OSError):
             await connection.close()
-    return getattr(device, "serial_number", None)
-
-
-async def _async_probe_device_type(
-    host: str, port: int, expected_serial: str
-) -> DeviceType | None:
-    """Try each device type until one answers with the expected serial.
-
-    Returns the first matching ``DeviceType`` or ``None``.
-    """
-    for device_type in DeviceType:
-        params = ModbusTcpParams(host=host, port=port)
-        connection = ModbusConnection(params)
-        try:
-            device = DEVICE_CLASSES[device_type](connection)
-            await device.async_update()
-        except (ModbusError, OSError):
-            continue
-        else:
-            # Verify the device's serial matches the one from mDNS.
-            # Every SMA device also serves its Type Label on unit 1, so
-            # probing with a different device class may succeed even when
-            # the measurement unit ID doesn't match. Checking the serial
-            # ensures we've found the right device.
-            if str(getattr(device, "serial_number", None)) == expected_serial:
-                return device_type
-        finally:
-            with suppress(ModbusError, OSError):
-                await connection.close()
-    return None
 
 
 class SmaConfigFlow(ConfigFlow, domain=DOMAIN):
@@ -150,7 +91,7 @@ class SmaConfigFlow(ConfigFlow, domain=DOMAIN):
         """Handle Zeroconf discovery.
 
         Extracts the serial from the mDNS hostname (``SMA<serial>.local``),
-        sets the unique ID, and probes the device to determine its type.
+        sets the unique ID, and discovers the device type and unit ID.
         If already configured, updates the host if it changed.
         """
         host = discovery_info.host
@@ -164,15 +105,15 @@ class SmaConfigFlow(ConfigFlow, domain=DOMAIN):
         await self.async_set_unique_id(unique_id)
         self._abort_if_unique_id_configured(updates={CONF_HOST: host})
 
-        # Probe the device to determine its type.
-        device_type = await _async_probe_device_type(host, DEFAULT_PORT, serial)
-        if device_type is None:
-            # Can't determine type — fall through to manual setup.
+        # Discover the device type and unit ID.
+        info = await _async_discover(host, DEFAULT_PORT)
+        if info is None or str(info.serial_number) != serial:
+            # Can't discover or serial mismatch — fall through to manual setup.
             self._discovered_data = {CONF_HOST: host}
             return await self.async_step_user()
 
         self._discovered_data = {
-            CONF_DEVICE_TYPE: device_type.value,
+            CONF_DEVICE_TYPE: info.device_type.value,
             CONF_HOST: host,
             CONF_PORT: DEFAULT_PORT,
         }
@@ -205,31 +146,25 @@ class SmaConfigFlow(ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
 
         if user_input is not None:
-            data = {
-                CONF_DEVICE_TYPE: user_input[CONF_DEVICE_TYPE],
-                CONF_HOST: str(user_input[CONF_HOST]).strip(),
-                CONF_PORT: int(user_input[CONF_PORT]),
-            }
-            try:
-                serial = await _async_validate(self.hass, data)
-            except CannotConnect:
+            host = str(user_input[CONF_HOST]).strip()
+            port = int(user_input[CONF_PORT])
+            info = await _async_discover(host, port)
+            if info is None:
                 errors["base"] = "cannot_connect"
-            except Exception:
-                _LOGGER.exception("Unexpected exception")
-                errors["base"] = "unknown"
             else:
-                if serial is None:
-                    errors["base"] = "no_serial"
-                else:
-                    unique_id = f"SMA{serial}"
-                    await self.async_set_unique_id(unique_id)
-                    self._abort_if_unique_id_configured(
-                        updates={CONF_HOST: data[CONF_HOST]}
-                    )
-                    return self.async_create_entry(
-                        title=data[CONF_HOST],
-                        data=data,
-                    )
+                unique_id = f"SMA{info.serial_number}"
+                await self.async_set_unique_id(unique_id)
+                self._abort_if_unique_id_configured(
+                    updates={CONF_HOST: host}
+                )
+                return self.async_create_entry(
+                    title=host,
+                    data={
+                        CONF_DEVICE_TYPE: info.device_type.value,
+                        CONF_HOST: host,
+                        CONF_PORT: port,
+                    },
+                )
 
         return self.async_show_form(
             step_id="user",

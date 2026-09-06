@@ -18,7 +18,7 @@ from modbus_connection.tmodbus import ModbusConnection
 
 from .const import CONF_DEVICE_TYPE, DEFAULT_PORT
 from .coordinator import SmaCoordinator
-from .sma_modbus import DEVICE_CLASSES, DeviceType
+from .sma_modbus import DEVICE_CLASSES, DeviceType, discover
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -39,7 +39,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: SmaConfigEntry) -> bool:
     connection = ModbusConnection(ModbusTcpParams(host=host, port=port))
     entry.async_on_unload(connection.close)
 
-    device = DEVICE_CLASSES[device_type](connection)
+    # Discover the unit ID from the Type Label on unit ID 1.
+    # The device type is already known from the config flow.
+    info = await discover(connection)
+    device = DEVICE_CLASSES[device_type](connection, info.unit_id)
 
     coordinator = SmaCoordinator(hass, entry, device, device_type)
     await coordinator.async_config_entry_first_refresh()

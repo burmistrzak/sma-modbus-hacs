@@ -5,7 +5,6 @@
     },
     "error": {
       "cannot_connect": "Failed to connect",
-      "no_serial": "The device did not report a serial number, which is needed to identify it.",
       "unknown": "Unexpected error"
     },
     "step": {
@@ -14,7 +13,6 @@
       },
       "user": {
         "data": {
-          "device_type": "Device type",
           "host": "Host",
           "port": "Modbus port"
         },

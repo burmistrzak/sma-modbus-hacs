@@ -30,7 +30,8 @@ Only _essential parameters_ are enabled by default.
    (*HACS → Integrations → ⋮ → Custom repositories*, category *Integration*).
 2. Install **SMA Modbus**, then restart Home Assistant.
 3. *Settings → Devices & Services → Add integration → SMA Modbus*.
-4. Pick your device type and enter the IP/hostname and Modbus port (default 502).
+4. Enter the IP/hostname and Modbus port (default 502). The device type is
+   auto-detected.
 
 > Modbus must be enabled on the device.
 

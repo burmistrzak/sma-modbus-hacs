@@ -3,28 +3,28 @@
   "name": "SMA Modbus",
   "codeowners": ["@burmistrzak"],
   "config_flow": true,
-  "zeroconf": [
-    {
-      "type": "_http._tcp.local.",
-      "name": "Website for SMA-Inverter: SMA*"
-    },
-    {
-      "type": "_http._tcp.local.",
-      "name": "Website for SMA-Product: SMA*"
-    },
-    {
-      "type": "_http._tcp.local.",
-      "name": "Website on SMA*",
-      "properties": {
-        "path": "/legal_notices.txt"
-      }
-    }
-  ],
   "documentation": "https://github.com/burmistrzak/sma-modbus-hacs",
   "integration_type": "device",
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/burmistrzak/sma-modbus-hacs/issues",
   "loggers": ["modbus_connection"],
   "requirements": ["modbus-connection[tmodbus]>=4.6.1,<5"],
-  "version": "1.0.1"
+  "version": "1.1.2",
+  "zeroconf": [
+    {
+      "type": "_http._tcp.local.",
+      "name": "website for sma-inverter: sma*"
+    },
+    {
+      "type": "_http._tcp.local.",
+      "name": "website for sma-product: sma*"
+    },
+    {
+      "type": "_http._tcp.local.",
+      "name": "website on sma*",
+      "properties": {
+        "path": "/legal_notices.txt"
+      }
+    }
+  ]
 }

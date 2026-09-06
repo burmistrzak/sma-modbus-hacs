@@ -282,7 +282,7 @@ SENSOR_DESCRIPTIONS: Final[dict[DeviceType, list[SmaSensorEntityDescription]]] =
         _reactive_power("ac_reactive_power_l2", enabled_default=False),
         _reactive_power("ac_reactive_power_l3", enabled_default=False),
         # AC apparent power
-        _apparent_power("ac_apparent_power"),
+        _apparent_power("ac_apparent_power", enabled_default=False),
         _apparent_power("ac_apparent_power_l1", enabled_default=False),
         _apparent_power("ac_apparent_power_l2", enabled_default=False),
         _apparent_power("ac_apparent_power_l3", enabled_default=False),
@@ -292,7 +292,7 @@ SENSOR_DESCRIPTIONS: Final[dict[DeviceType, list[SmaSensorEntityDescription]]] =
         # Battery
         _current("battery_current"),
         _battery("battery_state_of_charge"),
-        _battery("battery_nominal_capacity", EntityCategory.DIAGNOSTIC),
+        _battery("battery_nominal_capacity", EntityCategory.DIAGNOSTIC, enabled_default=False),
         _temperature("battery_temperature", EntityCategory.DIAGNOSTIC),
         _voltage("battery_voltage"),
         _power("battery_charge_power"),
@@ -310,9 +310,9 @@ SENSOR_DESCRIPTIONS: Final[dict[DeviceType, list[SmaSensorEntityDescription]]] =
         _voltage("battery_cell_voltage_sum", EntityCategory.DIAGNOSTIC, enabled_default=False),
         _voltage("battery_cell_voltage_min", EntityCategory.DIAGNOSTIC, enabled_default=False),
         _voltage("battery_cell_voltage_max", EntityCategory.DIAGNOSTIC, enabled_default=False),
-        _enum("bms_operating_status", CmpBmsStatus),
-        _energy("battery_current_charge_energy"),
-        _energy("battery_current_discharge_energy"),
+        _enum("bms_operating_status", CmpBmsStatus, enabled_default=False),
+        _energy("battery_current_charge_energy", enabled_default=False),
+        _energy("battery_current_discharge_energy", enabled_default=False),
         # DC strings (0-based)
         _power("dc_power_0"),
         _power("dc_power_1"),
@@ -363,13 +363,13 @@ SENSOR_DESCRIPTIONS: Final[dict[DeviceType, list[SmaSensorEntityDescription]]] =
         _reactive_power("ac_reactive_power_l2", enabled_default=False),
         _reactive_power("ac_reactive_power_l3", enabled_default=False),
         # AC apparent power
-        _apparent_power("ac_apparent_power"),
+        _apparent_power("ac_apparent_power", enabled_default=False),
         _apparent_power("ac_apparent_power_l1", enabled_default=False),
         _apparent_power("ac_apparent_power_l2", enabled_default=False),
         _apparent_power("ac_apparent_power_l3", enabled_default=False),
         # AC power factor
-        _power_factor("power_factor"),
-        _power_factor("power_factor_eei", enabled_default=False),
+        _power_factor("power_factor", enabled_default=False),
+        _power_factor("power_factor_eei"),
         # DC strings (0-based)
         _power("dc_power_0"),
         _power("dc_power_1"),

@@ -2,7 +2,7 @@
 
 Custom Home Assistant integration for **SMA** devices, utilizing the modernized Modbus stack.
 
-The device-specific communication lives in the `sma_modbus` library, which is
+The device-specific communication lives in the [`sma_modbus`](https://github.com/burmistrzak/sma-modbus) library, which is
 **vendorized** under `custom_components/sma_modbus/sma_modbus/`, so this integration
 is self-contained and installable through [HACS](https://hacs.xyz).
 

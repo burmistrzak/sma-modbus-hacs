@@ -5,7 +5,7 @@ from enum import IntEnum
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DEVICE_NAMES, DOMAIN
+from .const import CONF_HOSTNAME, CONF_WEB_PORT, DEVICE_NAMES, DOMAIN
 from .coordinator import SmaCoordinator
 from .sma_modbus import SmaComponent
 from .sma_modbus.home_manager import SunnyHomeManagerModel
@@ -54,6 +54,15 @@ class SmaEntity(CoordinatorEntity[SmaCoordinator]):
         serial_number = getattr(device, "serial_number", None)
         firmware_version = getattr(device, "firmware_version", None)
 
+        entry_data = coordinator.config_entry.data
+        hostname = entry_data.get(CONF_HOSTNAME)
+        if hostname is not None:
+            web_port = entry_data.get(CONF_WEB_PORT, 80)
+            scheme = "https" if web_port == 443 else "http"
+            configuration_url = f"{scheme}://{hostname}:{web_port}"
+        else:
+            configuration_url = None
+
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, coordinator.config_entry.unique_id)},
             manufacturer=vendor.name if vendor else "SMA",
@@ -61,9 +70,7 @@ class SmaEntity(CoordinatorEntity[SmaCoordinator]):
             model=_MODEL_NAMES.get(device_type, DEVICE_NAMES[coordinator.device_type]),
             serial_number=str(serial_number) if serial_number is not None else None,
             sw_version=str(firmware_version) if firmware_version is not None else None,
-            configuration_url=f"https://SMA{serial_number}.local"
-            if serial_number is not None
-            else None,
+            configuration_url=configuration_url,
         )
 
     @property

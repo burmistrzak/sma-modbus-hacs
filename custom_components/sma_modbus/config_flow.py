@@ -21,7 +21,7 @@ from homeassistant.helpers.service_info.zeroconf import ZeroconfServiceInfo
 from modbus_connection import ModbusError, ModbusTcpParams
 from modbus_connection.tmodbus import ModbusConnection
 
-from .const import CONF_DEVICE_TYPE, CONF_UNIT_ID, DEFAULT_PORT, DEVICE_NAMES, DOMAIN
+from .const import CONF_DEVICE_TYPE, CONF_HOSTNAME, CONF_UNIT_ID, CONF_WEB_PORT, DEFAULT_PORT, DEVICE_NAMES, DOMAIN
 from .sma_modbus import DEVICE_CLASSES, DeviceType, DiscoveryInfo, discover
 
 _LOGGER = logging.getLogger(__name__)
@@ -125,8 +125,11 @@ class SmaConfigFlow(ConfigFlow, domain=DOMAIN):
         self._discovered_data = {
             CONF_DEVICE_TYPE: info.device_type.value,
             CONF_HOST: host,
+            CONF_HOSTNAME: discovery_info.hostname,
             CONF_PORT: DEFAULT_PORT,
         }
+        if discovery_info.port:
+            self._discovered_data[CONF_WEB_PORT] = discovery_info.port
         return await self.async_step_discovery_confirm()
 
     async def async_step_discovery_confirm(

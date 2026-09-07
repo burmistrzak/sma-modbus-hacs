@@ -12,7 +12,6 @@ CONF_HOST: Final = "host"
 CONF_PORT: Final = "port"
 CONF_DEVICE_TYPE: Final = "device_type"
 CONF_UNIT_ID: Final = "unit_id"
-CONF_HOSTNAME: Final = "hostname"
 CONF_WEB_PORT: Final = "web_port"
 
 DEFAULT_PORT: Final = 502

@@ -20,6 +20,7 @@ is self-contained and installable through [HACS](https://hacs.xyz).
 - **Sunny Home Manager 2.0**
 - **Sunny Boy Smart Energy 3.6-6.0**
 - **Sunny Boy 3.0-6.0**
+- **Sunny Tripower 3.0-6.0**
 
 Only _essential parameters_ are enabled by default.
 
@@ -31,7 +32,7 @@ Only _essential parameters_ are enabled by default.
 2. Install **SMA Modbus**, then restart Home Assistant.
 3. *Settings → Devices & Services → Add integration → SMA Modbus*.
 4. Enter the IP/hostname and Modbus port (default 502). The device type is
-   auto-detected.
+   auto-detected. Optionally provide a Unit ID if auto-discovery fails.
 
 > Modbus must be enabled on the device.
 

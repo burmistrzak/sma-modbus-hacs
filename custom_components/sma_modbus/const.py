@@ -11,6 +11,7 @@ DOMAIN: Final = "sma_modbus"
 CONF_HOST: Final = "host"
 CONF_PORT: Final = "port"
 CONF_DEVICE_TYPE: Final = "device_type"
+CONF_UNIT_ID: Final = "unit_id"
 
 DEFAULT_PORT: Final = 502
 

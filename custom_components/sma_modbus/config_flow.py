@@ -22,13 +22,17 @@ from homeassistant.helpers.service_info.zeroconf import ZeroconfServiceInfo
 from modbus_connection import ModbusError, ModbusTcpParams
 from modbus_connection.tmodbus import ModbusConnection
 
-from .const import CONF_DEVICE_TYPE, DEFAULT_PORT, DEVICE_NAMES, DOMAIN
-from .sma_modbus import DeviceType, DiscoveryInfo, discover
+from .const import CONF_DEVICE_TYPE, CONF_UNIT_ID, DEFAULT_PORT, DEVICE_NAMES, DOMAIN
+from .sma_modbus import DEVICE_CLASSES, DeviceType, DiscoveryInfo, discover
 
 _LOGGER = logging.getLogger(__name__)
 
 _PORT = NumberSelector(
-    NumberSelectorConfig(min=1, max=65535, step=1, mode=NumberSelectorMode.BOX)
+    NumberSelectorConfig(min=502, max=65535, step=1, mode=NumberSelectorMode.BOX)
+)
+
+_UNIT_ID = NumberSelector(
+    NumberSelectorConfig(min=3, max=123, step=1, mode=NumberSelectorMode.BOX)
 )
 
 
@@ -45,6 +49,10 @@ def _schema(suggested_values: dict[str, Any] | None = None) -> vol.Schema:
                 CONF_PORT,
                 default=suggested.get(CONF_PORT, DEFAULT_PORT),
             ): _PORT,
+            vol.Optional(
+                CONF_UNIT_ID,
+                default=suggested.get(CONF_UNIT_ID),
+            ): _UNIT_ID,
         }
     )
 
@@ -60,7 +68,9 @@ def _extract_serial(hostname: str) -> str | None:
 
 
 async def _async_discover(
-    host: str, port: int
+    host: str,
+    port: int,
+    unit_id: int | None = None,
 ) -> DiscoveryInfo | None:
     """Discover the SMA device at ``host:port``.
 
@@ -68,7 +78,7 @@ async def _async_discover(
     """
     connection = ModbusConnection(ModbusTcpParams(host=host, port=port))
     try:
-        return await discover(connection)
+        return await discover(connection, unit_id=unit_id)
     except (ModbusError, OSError):
         return None
     finally:
@@ -148,7 +158,8 @@ class SmaConfigFlow(ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             host = str(user_input[CONF_HOST]).strip()
             port = int(user_input[CONF_PORT])
-            info = await _async_discover(host, port)
+            unit_id = user_input.get(CONF_UNIT_ID)
+            info = await _async_discover(host, port, unit_id=unit_id)
             if info is None:
                 errors["base"] = "cannot_connect"
             else:
@@ -157,13 +168,16 @@ class SmaConfigFlow(ConfigFlow, domain=DOMAIN):
                 self._abort_if_unique_id_configured(
                     updates={CONF_HOST: host}
                 )
+                data: dict[str, Any] = {
+                    CONF_DEVICE_TYPE: info.device_type.value,
+                    CONF_HOST: host,
+                    CONF_PORT: port,
+                }
+                if info.unit_id != DEVICE_CLASSES[info.device_type].default_unit_id:
+                    data[CONF_UNIT_ID] = info.unit_id
                 return self.async_create_entry(
                     title=host,
-                    data={
-                        CONF_DEVICE_TYPE: info.device_type.value,
-                        CONF_HOST: host,
-                        CONF_PORT: port,
-                    },
+                    data=data,
                 )
 
         return self.async_show_form(

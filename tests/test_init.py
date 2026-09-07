@@ -7,46 +7,47 @@ from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_registry import async_entries_for_config_entry
 from homeassistant.helpers.entity_registry import async_get as async_get_entity_registry
-from modbus_connection.mock import MockModbusConnection, MockModbusUnit
+from modbus_connection.mock import MockModbusConnection
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.sma_modbus.const import CONF_DEVICE_TYPE, CONF_UNIT_ID, DOMAIN
+from custom_components.sma_modbus.const import CONF_DEVICE_TYPE, DOMAIN
 from custom_components.sma_modbus.coordinator import SmaCoordinator
 from custom_components.sma_modbus.sensor import SENSOR_DESCRIPTIONS
 from custom_components.sma_modbus.sma_modbus import DeviceType, SunnyBoySmartEnergy
 from custom_components.sma_modbus.sma_modbus.testing import set_input_registers
 
 
-def _preloaded_unit() -> MockModbusUnit:
-    """Return a mock unit preloaded with Sunny Boy Smart Energy data."""
+def _preloaded_connection() -> MockModbusConnection:
+    """Return a mock connection preloaded with Sunny Boy Smart Energy data."""
     connection = MockModbusConnection()
     unit = connection.for_unit(3)
     set_input_registers(
-        unit,
+        connection,
         SunnyBoySmartEnergy(unit),
         {
             "pv_power": 4000,
             "pv_energy_total": 123456789,
             "battery_state_of_charge": 80,
             "dc_voltage_1": 35000,
+            "serial_number": 30001234,
+            "device_class": 8009,
+            "device_type": 19085,
+            "vendor": 461,
         },
     )
-    return unit
+    return connection
 
 
 async def test_setup_and_sensors(hass: HomeAssistant) -> None:
     """Test the integration sets up and exposes the device sensors."""
-    unit = _preloaded_unit()
-    connection = MockModbusConnection()
-    connection.for_unit = lambda _unit_id: unit  # return the preloaded unit
+    connection = _preloaded_connection()
 
     entry = MockConfigEntry(
         domain=DOMAIN,
-        unique_id="192.168.178.1:502:3:sunny_boy_smart_energy",
+        unique_id="SMA30001234",
         data={
             CONF_HOST: "192.168.178.1",
             CONF_PORT: 502,
-            CONF_UNIT_ID: 3,
             CONF_DEVICE_TYPE: DeviceType.SUNNY_BOY_SMART_ENERGY.value,
         },
     )
@@ -72,17 +73,14 @@ async def test_setup_and_sensors(hass: HomeAssistant) -> None:
 
 async def test_setup_unload(hass: HomeAssistant) -> None:
     """Test the integration unloads cleanly."""
-    unit = _preloaded_unit()
-    connection = MockModbusConnection()
-    connection.for_unit = lambda _unit_id: unit
+    connection = _preloaded_connection()
 
     entry = MockConfigEntry(
         domain=DOMAIN,
-        unique_id="192.168.178.1:502:3:sunny_boy_smart_energy",
+        unique_id="SMA30001234",
         data={
             CONF_HOST: "192.168.178.1",
             CONF_PORT: 502,
-            CONF_UNIT_ID: 3,
             CONF_DEVICE_TYPE: DeviceType.SUNNY_BOY_SMART_ENERGY.value,
         },
     )

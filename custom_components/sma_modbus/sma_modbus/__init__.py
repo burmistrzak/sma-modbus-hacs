@@ -14,7 +14,7 @@ import logging
 from dataclasses import dataclass
 from enum import StrEnum
 
-from modbus_connection import ModbusConnection, ModbusError
+from modbus_connection import ModbusConnection, ModbusError, ModbusUnit
 
 from ._base import SmaComponent, Vendor
 from .home_manager import DeviceClass as SunnyHomeManagerDeviceClass
@@ -30,6 +30,8 @@ from .sunny_boy_smart_energy import (
 from .sunny_boy_smart_energy import (
     DeviceClass as SunnyBoySmartEnergyDeviceClass,
 )
+
+_LOGGER = logging.getLogger(__name__)
 
 __all__ = [
     "DEVICE_CLASSES",
@@ -68,9 +70,6 @@ DEVICE_CLASSES: dict[DeviceType, type[SmaComponent]] = {
 }
 
 
-_LOGGER = logging.getLogger(__name__)
-
-
 # Device class values from input register 30051 (Nameplate.MainModel).
 _DEVICE_CLASS_SHM = SunnyHomeManagerDeviceClass.COMMUNICATION_PRODUCTS.value
 _DEVICE_CLASS_SB = SunnyBoyDeviceClass.SOLAR_INVERTERS.value
@@ -84,7 +83,7 @@ class DiscoveryInfo:
     ``device_type`` selects the :class:`SmaComponent` subclass to use;
     ``serial_number`` is the device's physical serial;
     ``unit_id`` is the Modbus unit ID the measurement registers answer on;
-    the remaining fields are the raw Type Label values from unit ID 1.
+    the remaining fields are the raw Type Label values.
     """
 
     device_type: DeviceType
@@ -104,7 +103,37 @@ def _combine_u32(words: list[int]) -> int:
 
 def _is_nan(value: int) -> bool:
     """Check if a 32-bit value is a NaN sentinel."""
-    return value in (0xFFFFFFFF, 0x00FFFFFD, 0x80000000)
+    return value in (0xFFFFFFFF, 0x00FFFFFD, 0xFFFFFFFE, 0x80000000)
+
+
+async def _read_type_label(unit: ModbusUnit) -> dict[str, int] | None:
+    """Read the Type Label from a Modbus unit.
+
+    Returns the decoded fields as a dict, or ``None`` if the serial number
+    or device class is a NaN sentinel (the unit is not serving valid data).
+    Raises :class:`~modbus_connection.ModbusError` if the read itself fails.
+    """
+    words = await unit.read_input_registers(30001, 6)
+    revision = _combine_u32(words[0:2])
+    susy_id = _combine_u32(words[2:4])
+    serial = _combine_u32(words[4:6])
+
+    words = await unit.read_input_registers(30051, 6)
+    device_class = _combine_u32(words[0:2])
+    device_model = _combine_u32(words[2:4])
+    vendor = _combine_u32(words[4:6])
+
+    if _is_nan(serial) or _is_nan(device_class):
+        return None
+
+    return {
+        "modbus_profile_revision": revision,
+        "susy_id": susy_id,
+        "serial_number": serial,
+        "device_class": device_class,
+        "device_model": device_model,
+        "vendor": vendor,
+    }
 
 
 async def discover(
@@ -114,39 +143,45 @@ async def discover(
 ) -> DiscoveryInfo:
     """Auto-detect the SMA device at the other end of ``connection``.
 
-    Reads the Type Label from Unit ID 1 (input registers 30001-30006 and
-    30051-30056): serial number, SUSy ID, Modbus profile revision, device
-    class, device model, and manufacturer.
+    Reads the Type Label (input registers 30001-30006 and 30051-30056) to
+    determine the device class, model, serial number, SUSy ID, manufacturer,
+    and Modbus profile revision.
 
-    The device class is mapped to a :class:`DeviceType`. The measurement unit
-    ID defaults to the device class's standard unit ID (3 for inverters,
-    2 for the Sunny Home Manager); pass ``unit_id`` to override it for edge
-    cases where a device has been reconfigured.
+    When ``unit_id`` is not provided, the Type Label is probed on unit ID 1
+    first, then unit ID 3.  Some devices (e.g. the Sunny Boy) do not serve
+    the Type Label on unit 1; unit 3 is the standard measurement unit for SMA
+    inverters.  Unit 2 is never probed — it is reserved for PV plant-wide
+    parameters.
 
-    Returns a :class:`DiscoveryInfo` with all Type Label fields and the
-    unit ID to use for measurements.
+    When ``unit_id`` is provided, the Type Label is read from that unit
+    directly, and it is used as the measurement unit ID.  This covers
+    inverters that have been reconfigured to a non-default unit ID.
+
+    The device class is mapped to a :class:`DeviceType`.  Returns a
+    :class:`DiscoveryInfo` with all Type Label fields and the unit ID to
+    use for measurements.
     Raises :class:`~modbus_connection.ModbusError` if the device cannot be
     discovered or is not a supported SMA device.
     """
-    unit1 = connection.for_unit(1)
+    probe_ids = [unit_id] if unit_id is not None else [1, 3]
 
-    # Read two contiguous Type Label blocks from unit 1:
-    #   30001-30006: modbus profile revision, SUSy ID, serial number
-    #   30051-30056: device class, device model, manufacturer
-    words = await unit1.read_input_registers(30001, 6)
-    modbus_profile_revision = _combine_u32(words[0:2])
-    susy_id = _combine_u32(words[2:4])
-    serial_number = _combine_u32(words[4:6])
+    label: dict[str, int] | None = None
+    for probe_unit_id in probe_ids:
+        unit = connection.for_unit(probe_unit_id)
+        try:
+            label = await _read_type_label(unit)
+        except ModbusError:
+            continue
+        if label is not None:
+            _LOGGER.debug("Type Label read from unit ID %d", probe_unit_id)
+            break
 
-    words = await unit1.read_input_registers(30051, 6)
-    device_class = _combine_u32(words[0:2])
-    device_model = _combine_u32(words[2:4])
-    vendor = _combine_u32(words[4:6])
+    if label is None:
+        raise ModbusError(
+            f"Could not read Type Label from unit ID {probe_ids[-1]}"
+        )
 
-    if _is_nan(serial_number):
-        raise ModbusError("Serial number not available on unit 1")
-    if _is_nan(device_class):
-        raise ModbusError("Device class not available on unit 1")
+    device_class = label["device_class"]
 
     # Map device class to DeviceType.
     if device_class == _DEVICE_CLASS_SHM:
@@ -158,19 +193,16 @@ async def discover(
     else:
         raise ModbusError(f"Unknown device class: {device_class}")
 
-    # Use the provided unit_id, or the device type's default.
-    if unit_id is not None:
-        _LOGGER.debug("Using overridden unit ID %d for %s", unit_id, device_type.value)
-    else:
+    if unit_id is None:
         unit_id = DEVICE_CLASSES[device_type].default_unit_id
 
     return DiscoveryInfo(
         device_type=device_type,
-        serial_number=serial_number,
+        serial_number=label["serial_number"],
         unit_id=unit_id,
-        susy_id=susy_id,
-        modbus_profile_revision=modbus_profile_revision,
+        susy_id=label["susy_id"],
+        modbus_profile_revision=label["modbus_profile_revision"],
         device_class=device_class,
-        device_model=device_model,
-        vendor=vendor,
+        device_model=label["device_model"],
+        vendor=label["vendor"],
     )

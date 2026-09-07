@@ -254,6 +254,8 @@ SENSOR_DESCRIPTIONS: Final[dict[DeviceType, list[SmaSensorEntityDescription]]] =
         _power("grid_export_power"),
     ],
     DeviceType.SUNNY_BOY_SMART_ENERGY: [
+        # System status
+        _enum("system_status", SystemStatus, EntityCategory.DIAGNOSTIC),
         # PV
         _power("pv_power"),
         _energy("pv_energy_total"),
@@ -335,6 +337,8 @@ SENSOR_DESCRIPTIONS: Final[dict[DeviceType, list[SmaSensorEntityDescription]]] =
         ),
     ],
     DeviceType.SUNNY_BOY: [
+        # System status
+        _enum("system_status", SystemStatus, EntityCategory.DIAGNOSTIC),
         # PV
         _power("pv_power"),
         _energy("pv_energy_total"),
@@ -383,6 +387,73 @@ SENSOR_DESCRIPTIONS: Final[dict[DeviceType, list[SmaSensorEntityDescription]]] =
             "insulation_residual_current",
             UnitOfElectricCurrent.MILLIAMPERE,
             EntityCategory.DIAGNOSTIC,
+        ),
+    ],
+    DeviceType.SUNNY_TRIPOWER: [
+        # System status
+        _enum("system_status", SystemStatus, EntityCategory.DIAGNOSTIC),
+        # Energy
+        _energy("pv_energy_total"),
+        _energy("grid_import_energy", enabled_default=False),
+        _energy("grid_export_energy"),
+        # AC power
+        _power("ac_power"),
+        _power("ac_power_l1", enabled_default=False),
+        _power("ac_power_l2", enabled_default=False),
+        _power("ac_power_l3", enabled_default=False),
+        # Grid power
+        _power("grid_import_power", enabled_default=False),
+        _power("grid_export_power", enabled_default=False),
+        # AC voltage
+        _voltage("ac_voltage_l1"),
+        _voltage("ac_voltage_l2"),
+        _voltage("ac_voltage_l3"),
+        _voltage("ac_voltage_l1_l2", enabled_default=False),
+        _voltage("ac_voltage_l2_l3", enabled_default=False),
+        _voltage("ac_voltage_l3_l1", enabled_default=False),
+        # AC current
+        _current("ac_current"),
+        _current("ac_current_l1", enabled_default=False),
+        _current("ac_current_l2", enabled_default=False),
+        _current("ac_current_l3", enabled_default=False),
+        # AC frequency
+        _frequency("grid_frequency"),
+        # AC reactive power
+        _reactive_power("ac_reactive_power"),
+        _reactive_power("ac_reactive_power_l1", enabled_default=False),
+        _reactive_power("ac_reactive_power_l2", enabled_default=False),
+        _reactive_power("ac_reactive_power_l3", enabled_default=False),
+        # AC apparent power
+        _apparent_power("ac_apparent_power", enabled_default=False),
+        _apparent_power("ac_apparent_power_l1", enabled_default=False),
+        _apparent_power("ac_apparent_power_l2", enabled_default=False),
+        _apparent_power("ac_apparent_power_l3", enabled_default=False),
+        # AC power factor
+        _power_factor("power_factor", enabled_default=False),
+        _power_factor("power_factor_eei"),
+        # DC strings
+        _power("dc_power_0"),
+        _power("dc_power_1"),
+        _voltage("dc_voltage_0"),
+        _voltage("dc_voltage_1"),
+        _current("dc_current_0"),
+        _current("dc_current_1"),
+        _current("dc_current_2", enabled_default=False),
+        _current("dc_current_3", enabled_default=False),
+        # Insulation
+        _ohm("insulation_resistance", EntityCategory.DIAGNOSTIC),
+        _current(
+            "insulation_residual_current",
+            UnitOfElectricCurrent.MILLIAMPERE,
+            EntityCategory.DIAGNOSTIC,
+        ),
+        # Temperature
+        _temperature("internal_temperature", EntityCategory.DIAGNOSTIC),
+        # Intermediate circuit voltage
+        _voltage(
+            "intermediate_circuit_voltage",
+            enabled_default=False,
+            entity_category=EntityCategory.DIAGNOSTIC,
         ),
     ],
 }

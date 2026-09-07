@@ -93,6 +93,7 @@
       "dc_current_0": { "name": "DC current string 0" },
       "dc_current_1": { "name": "DC current string 1" },
       "dc_current_2": { "name": "DC current string 2" },
+      "dc_current_3": { "name": "DC current string 3" },
       "dc_energy_total_0": { "name": "DC energy total string 0" },
       "dc_energy_total_1": { "name": "DC energy total string 1" },
       "dc_energy_total_2": { "name": "DC energy total string 2" },
@@ -109,6 +110,8 @@
       "grid_import_power": { "name": "Grid import power" },
       "insulation_resistance": { "name": "Insulation resistance" },
       "insulation_residual_current": { "name": "Insulation residual current" },
+      "intermediate_circuit_voltage": { "name": "Intermediate circuit voltage" },
+      "internal_temperature": { "name": "Internal temperature" },
       "power_factor": { "name": "Power factor" },
       "power_factor_eei": { "name": "Power factor (EEI)" },
       "pv_energy_total": { "name": "PV energy total" },
@@ -116,9 +119,10 @@
       "system_status": {
         "name": "System status",
         "state": {
+          "fault": "Fault",
+          "off": "Off",
           "ok": "OK",
-          "warning": "Warning",
-          "error": "Error"
+          "warning": "Warning"
         }
       }
     }

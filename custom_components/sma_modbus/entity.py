@@ -11,6 +11,7 @@ from .sma_modbus import SmaComponent
 from .sma_modbus.home_manager import SunnyHomeManagerModel
 from .sma_modbus.sunny_boy import SunnyBoyModel
 from .sma_modbus.sunny_boy_smart_energy import SunnyBoySmartEnergyModel
+from .sma_modbus.sunny_tripower import SunnyTripowerModel
 
 # Human-readable product names for each device model, sourced from the
 # SMA Modbus parameter lists.
@@ -33,6 +34,10 @@ _MODEL_NAMES: dict[IntEnum, str] = {
     SunnyBoySmartEnergyModel.SBSE_9_6_US: "Sunny Boy Smart Energy 9.6-US",
     SunnyBoySmartEnergyModel.SBSE_9_9: "Sunny Boy Smart Energy 9.9",
     SunnyBoySmartEnergyModel.SBSE_11_5_US: "Sunny Boy Smart Energy 11.5-US",
+    SunnyTripowerModel.STP_3_0: "Sunny Tripower 3.0",
+    SunnyTripowerModel.STP_4_0: "Sunny Tripower 4.0",
+    SunnyTripowerModel.STP_5_0: "Sunny Tripower 5.0",
+    SunnyTripowerModel.STP_6_0: "Sunny Tripower 6.0",
 }
 
 

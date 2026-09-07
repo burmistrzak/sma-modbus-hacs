@@ -11,7 +11,6 @@ import voluptuous as vol
 from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
 from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.selector import (
     NumberSelector,
     NumberSelectorConfig,
@@ -31,8 +30,9 @@ _PORT = NumberSelector(
     NumberSelectorConfig(min=502, max=65535, step=1, mode=NumberSelectorMode.BOX)
 )
 
-_UNIT_ID = NumberSelector(
-    NumberSelectorConfig(min=0, max=123, step=1, mode=NumberSelectorMode.BOX)
+_UNIT_ID = vol.All(
+    NumberSelector(NumberSelectorConfig(min=0, max=123, step=1, mode=NumberSelectorMode.BOX)),
+    vol.Coerce(int),
 )
 
 
@@ -158,7 +158,7 @@ class SmaConfigFlow(ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             host = str(user_input[CONF_HOST]).strip()
             port = int(user_input[CONF_PORT])
-            unit_id = user_input.get(CONF_UNIT_ID)
+            unit_id = user_input.get(CONF_UNIT_ID) or 0
             if unit_id == 0:
                 unit_id = None
             info = await _async_discover(host, port, unit_id=unit_id)
@@ -187,7 +187,3 @@ class SmaConfigFlow(ConfigFlow, domain=DOMAIN):
             data_schema=_schema(self._discovered_data or None),
             errors=errors,
         )
-
-
-class CannotConnect(HomeAssistantError):
-    """Error to indicate we cannot connect."""

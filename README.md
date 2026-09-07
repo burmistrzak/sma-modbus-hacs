@@ -20,7 +20,7 @@ is self-contained and installable through [HACS](https://hacs.xyz).
 - **Sunny Home Manager 2.0**
 - **Sunny Boy Smart Energy 3.6-6.0**
 - **Sunny Boy 3.0-6.0**
-- **Sunny Tripower 3.0-6.0**
+- **Sunny Tripower 3.0-6.0** <sup>untested</sup>
 
 Only _essential parameters_ are enabled by default.
 

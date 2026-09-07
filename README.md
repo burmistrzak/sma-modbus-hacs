@@ -43,6 +43,13 @@ Only _essential parameters_ are enabled by default.
   requirements.
 
 
+## Removal
+
+1. *Settings → Devices & Services → SMA Modbus* → select the device → **Delete**.
+   This removes the config entry and all entities.
+2. In HACS, uninstall **SMA Modbus**, then restart Home Assistant.
+
+
 ## Development
 
 ```bash

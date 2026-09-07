@@ -10,7 +10,6 @@ from typing import Any
 import voluptuous as vol
 from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
 from homeassistant.const import CONF_HOST, CONF_PORT
-from homeassistant.core import HomeAssistant
 from homeassistant.helpers.selector import (
     NumberSelector,
     NumberSelectorConfig,
@@ -21,7 +20,14 @@ from homeassistant.helpers.service_info.zeroconf import ZeroconfServiceInfo
 from modbus_connection import ModbusError, ModbusTcpParams
 from modbus_connection.tmodbus import ModbusConnection
 
-from .const import CONF_DEVICE_TYPE, CONF_UNIT_ID, CONF_WEB_PORT, DEFAULT_PORT, DEVICE_NAMES, DOMAIN
+from .const import (
+    CONF_DEVICE_TYPE,
+    CONF_UNIT_ID,
+    CONF_WEB_PORT,
+    DEFAULT_PORT,
+    DEVICE_NAMES,
+    DOMAIN,
+)
 from .sma_modbus import DEVICE_CLASSES, DeviceType, DiscoveryInfo, discover
 
 _LOGGER = logging.getLogger(__name__)
@@ -31,7 +37,9 @@ _PORT = NumberSelector(
 )
 
 _UNIT_ID = vol.All(
-    NumberSelector(NumberSelectorConfig(min=0, max=123, step=1, mode=NumberSelectorMode.BOX)),
+    NumberSelector(
+        NumberSelectorConfig(min=0, max=123, step=1, mode=NumberSelectorMode.BOX)
+    ),
     vol.Coerce(int),
 )
 
@@ -169,9 +177,7 @@ class SmaConfigFlow(ConfigFlow, domain=DOMAIN):
             else:
                 unique_id = f"SMA{info.serial_number}"
                 await self.async_set_unique_id(unique_id)
-                self._abort_if_unique_id_configured(
-                    updates={CONF_HOST: host}
-                )
+                self._abort_if_unique_id_configured(updates={CONF_HOST: host})
                 data: dict[str, Any] = {
                     CONF_DEVICE_TYPE: info.device_type.value,
                     CONF_HOST: host,

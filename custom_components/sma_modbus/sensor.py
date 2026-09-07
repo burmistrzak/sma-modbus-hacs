@@ -27,7 +27,7 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.helpers.typing import StateType
 
 from . import SmaConfigEntry
-from .const import DEVICE_NAMES, DOMAIN, UnitOfElectricResistance
+from .const import UnitOfElectricResistance
 from .coordinator import SmaCoordinator
 from .entity import SmaEntity
 from .sma_modbus import DeviceType
@@ -47,6 +47,7 @@ class SmaSensorEntityDescription(SensorEntityDescription):
     """
 
     def __post_init__(self) -> None:
+        """Set translation_key default to the entity key."""
         if self.translation_key is None:
             object.__setattr__(self, "translation_key", self.key)
 
@@ -294,7 +295,9 @@ SENSOR_DESCRIPTIONS: Final[dict[DeviceType, list[SmaSensorEntityDescription]]] =
         # Battery
         _current("battery_current"),
         _battery("battery_state_of_charge"),
-        _battery("battery_nominal_capacity", EntityCategory.DIAGNOSTIC, enabled_default=False),
+        _battery(
+            "battery_nominal_capacity", EntityCategory.DIAGNOSTIC, enabled_default=False
+        ),
         _temperature("battery_temperature", EntityCategory.DIAGNOSTIC),
         _voltage("battery_voltage"),
         _power("battery_charge_power"),
@@ -303,15 +306,37 @@ SENSOR_DESCRIPTIONS: Final[dict[DeviceType, list[SmaSensorEntityDescription]]] =
         _energy("battery_discharge_energy"),
         _enum("battery_health", BatteryHealth, EntityCategory.DIAGNOSTIC),
         _voltage("battery_max_voltage", EntityCategory.DIAGNOSTIC),
-        _temperature("battery_temperature_max", EntityCategory.DIAGNOSTIC, enabled_default=False),
-        _temperature("battery_temperature_min", EntityCategory.DIAGNOSTIC, enabled_default=False),
-        _voltage("battery_end_of_charge_voltage", EntityCategory.DIAGNOSTIC, enabled_default=False),
-        _voltage("battery_end_of_discharge_voltage", EntityCategory.DIAGNOSTIC, enabled_default=False),
-        _current("battery_max_charge_current", entity_category=EntityCategory.DIAGNOSTIC),
-        _current("battery_max_discharge_current", entity_category=EntityCategory.DIAGNOSTIC),
-        _voltage("battery_cell_voltage_sum", EntityCategory.DIAGNOSTIC, enabled_default=False),
-        _voltage("battery_cell_voltage_min", EntityCategory.DIAGNOSTIC, enabled_default=False),
-        _voltage("battery_cell_voltage_max", EntityCategory.DIAGNOSTIC, enabled_default=False),
+        _temperature(
+            "battery_temperature_max", EntityCategory.DIAGNOSTIC, enabled_default=False
+        ),
+        _temperature(
+            "battery_temperature_min", EntityCategory.DIAGNOSTIC, enabled_default=False
+        ),
+        _voltage(
+            "battery_end_of_charge_voltage",
+            EntityCategory.DIAGNOSTIC,
+            enabled_default=False,
+        ),
+        _voltage(
+            "battery_end_of_discharge_voltage",
+            EntityCategory.DIAGNOSTIC,
+            enabled_default=False,
+        ),
+        _current(
+            "battery_max_charge_current", entity_category=EntityCategory.DIAGNOSTIC
+        ),
+        _current(
+            "battery_max_discharge_current", entity_category=EntityCategory.DIAGNOSTIC
+        ),
+        _voltage(
+            "battery_cell_voltage_sum", EntityCategory.DIAGNOSTIC, enabled_default=False
+        ),
+        _voltage(
+            "battery_cell_voltage_min", EntityCategory.DIAGNOSTIC, enabled_default=False
+        ),
+        _voltage(
+            "battery_cell_voltage_max", EntityCategory.DIAGNOSTIC, enabled_default=False
+        ),
         _enum("bms_operating_status", CmpBmsStatus, enabled_default=False),
         _energy("battery_current_charge_energy", enabled_default=False),
         _energy("battery_current_discharge_energy", enabled_default=False),

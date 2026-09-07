@@ -40,11 +40,25 @@ class SmaCoordinator(DataUpdateCoordinator[SmaComponent]):
         )
         self.device = device
         self.device_type = device_type
+        self._was_available = False
 
     async def _async_update_data(self) -> SmaComponent:
         """Refresh all SMA data."""
         try:
             await self.device.async_update()
         except ModbusError as err:
+            if self._was_available:
+                _LOGGER.warning(
+                    "SMA device at %s became unavailable: %s",
+                    self.config_entry.data.get("host"),
+                    err,
+                )
+                self._was_available = False
             raise UpdateFailed(f"Error communicating with SMA device: {err}") from err
+        if not self._was_available:
+            _LOGGER.info(
+                "SMA device at %s is now available",
+                self.config_entry.data.get("host"),
+            )
+            self._was_available = True
         return self.device

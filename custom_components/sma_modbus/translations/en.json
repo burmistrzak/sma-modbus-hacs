@@ -20,7 +20,7 @@
         "data_description": {
           "host": "The IP address or hostname of your SMA device.",
           "port": "Port of the device's Modbus TCP interface. Only used when Modbus is enabled on the device.",
-          "unit_id": "Only needed if auto-discovery fails. The Modbus unit ID serving the device's Type Label and measurement data."
+          "unit_id": "Only needed if auto-discovery fails. Set to 0 to auto-detect (default). The Modbus unit ID serving the device's Type Label and measurement data."
         },
         "description": "Configure your SMA Modbus TCP device."
       }

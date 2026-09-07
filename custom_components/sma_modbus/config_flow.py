@@ -32,7 +32,7 @@ _PORT = NumberSelector(
 )
 
 _UNIT_ID = NumberSelector(
-    NumberSelectorConfig(min=3, max=123, step=1, mode=NumberSelectorMode.BOX)
+    NumberSelectorConfig(min=0, max=123, step=1, mode=NumberSelectorMode.BOX)
 )
 
 
@@ -51,7 +51,7 @@ def _schema(suggested_values: dict[str, Any] | None = None) -> vol.Schema:
             ): _PORT,
             vol.Optional(
                 CONF_UNIT_ID,
-                default=suggested.get(CONF_UNIT_ID),
+                default=suggested.get(CONF_UNIT_ID, 0),
             ): _UNIT_ID,
         }
     )
@@ -159,6 +159,8 @@ class SmaConfigFlow(ConfigFlow, domain=DOMAIN):
             host = str(user_input[CONF_HOST]).strip()
             port = int(user_input[CONF_PORT])
             unit_id = user_input.get(CONF_UNIT_ID)
+            if unit_id == 0:
+                unit_id = None
             info = await _async_discover(host, port, unit_id=unit_id)
             if info is None:
                 errors["base"] = "cannot_connect"
